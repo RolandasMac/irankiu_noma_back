@@ -231,18 +231,46 @@ const post = {
   title: { type: String, required: true },
   content: { type: String, required: true },
 };
-
-export default {
-  // userInMemberSchemaDefinition,
-  // user,
-  // error,
-  // post,
-  // docs,
-  // vote,
-  // member,
-  // employee,
-  // chatai,
-  // proposal,
-  // comment,
+const clients = {
+  id: { type: String, required: true },
+  name: { type: String, required: true },
+  addres: { type: String, required: true },
+  phone: { type: String, required: true },
+  email: { type: String, required: true },
+};
+const tools = {
+  // tool_id: { type: String, required: true },
+  name: { type: String, required: true },
+  description: { type: [String], required: true },
+  price: { type: Number, required: true },
+  depozit: { type: Number, required: true },
+  rented: { type: Boolean, required: true, default: false },
+  rented_until: { type: Date, required: false },
+};
+const orders = {
+  client_id: { type: String, required: true },
+  tool_id: { type: String, required: true },
+  date: { type: Date, required: true },
+  // time: { type: Date, required: true },
+  discount: { type: Number, required: true },
+  docs_urls: { type: [{ String: String }], required: true }, // Gal reikia objekų array. Objektas: dokumento tipas:url
+  pay_sum: { type: Number, required: true },
+  paid: { type: Boolean, required: true },
+  date_until: { type: Date, required: true },
+  returned: { type: Boolean, required: true },
+};
+const discounts = {
+  tols_id: { type: [String], required: true },
+  min_days: { type: Number, required: true },
+  max_days: { type: Number, required: true },
+  discount: { type: Number, required: true },
+  valid_from: { type: Date, required: true },
+  valid_until: { type: Date, required: true },
+};
+module.exports = {
   post,
+  clients,
+  tools,
+  orders,
+  discounts,
 };
