@@ -23,14 +23,15 @@ export async function listTools(req, res) {
 
 export async function getTool(req, res) {
   const { id } = req.params;
-  const tool = await Tool.findOne({ id }).lean();
+  const tool = await Tool.findOne({ _id: id }).lean();
   if (!tool)
     return res.status(404).json({ success: false, message: "Tool not found" });
   res.json({ success: true, tool });
 }
 
 export async function createTool(req, res) {
-  let { name, description, price, depozit, rented, rented_until } = req.body;
+  let { name, description, images_urls, price, depozit, rented, rented_until } =
+    req.body;
   // if (!id) id = uuidv4();
 
   // const exists = await Tool.findOne({ id });
@@ -42,6 +43,7 @@ export async function createTool(req, res) {
   const tool = new Tool({
     name,
     description,
+    images_urls,
     price,
     depozit,
     rented,

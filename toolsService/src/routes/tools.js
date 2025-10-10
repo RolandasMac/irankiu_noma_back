@@ -15,6 +15,7 @@ const toolSchema = Joi.object({
   id: Joi.string().optional(),
   name: Joi.string().trim().min(1).required(),
   description: Joi.array().items(Joi.string().trim().min(1)).required(),
+  images_urls: Joi.array().items(Joi.string().trim().min(1)).required(),
   price: Joi.number().required(),
   depozit: Joi.number().required(),
   rented: Joi.boolean().default(false),

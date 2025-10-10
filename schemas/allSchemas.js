@@ -242,6 +242,7 @@ const tools = {
   // tool_id: { type: String, required: true },
   name: { type: String, required: true },
   description: { type: [String], required: true },
+  images_urls: { type: [String], required: true },
   price: { type: Number, required: true },
   depozit: { type: Number, required: true },
   rented: { type: Boolean, required: true, default: false },
