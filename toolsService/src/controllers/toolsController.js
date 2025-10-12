@@ -1,5 +1,5 @@
 import Tool from "../models/Tool.js";
-import { v4 as uuidv4 } from "uuid";
+// import { v4 as uuidv4 } from "uuid";
 
 export async function listTools(req, res) {
   const page = Math.max(1, Number(req.query.page) || 1);
@@ -18,7 +18,14 @@ export async function listTools(req, res) {
     Tool.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
   ]);
 
-  res.json({ success: true, page, limit, total, items });
+  res.json({
+    success: true,
+    message: "Tools listed successfully",
+    page,
+    limit,
+    total,
+    items,
+  });
 }
 
 export async function getTool(req, res) {
@@ -26,7 +33,7 @@ export async function getTool(req, res) {
   const tool = await Tool.findOne({ _id: id }).lean();
   if (!tool)
     return res.status(404).json({ success: false, message: "Tool not found" });
-  res.json({ success: true, tool });
+  res.json({ success: true, message: "Tool found successfully", tool });
 }
 
 export async function createTool(req, res) {
@@ -57,20 +64,22 @@ export async function createTool(req, res) {
 export async function updateTool(req, res) {
   const { id } = req.params;
   const updates = req.body;
-
-  const tool = await Tool.findOneAndUpdate({ id }, updates, {
+  console.log("Updates", id, updates);
+  const tool = await Tool.findOneAndUpdate({ _id: id }, updates, {
     new: true,
     runValidators: true,
   });
   if (!tool)
     return res.status(404).json({ success: false, message: "Tool not found" });
 
-  res.json({ success: true, tool });
+  res.json({ success: true, tool, message: "Tool updated" });
 }
 
 export async function deleteTool(req, res) {
   const { id } = req.params;
-  const tool = await Tool.findOneAndDelete({ id });
+  console.log("Trynimas id", id);
+
+  const tool = await Tool.findOneAndDelete({ _id: id });
   if (!tool)
     return res.status(404).json({ success: false, message: "Tool not found" });
 
