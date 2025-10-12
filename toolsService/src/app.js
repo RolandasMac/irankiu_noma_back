@@ -3,6 +3,9 @@ import cors from "cors";
 import "express-async-errors";
 import toolsRoutes from "./routes/tools.js";
 import { notFoundHandler, errorHandler } from "./middleware/errorHandler.js";
+import paths from "../../config/paths.js";
+
+const { imageUploadsDir } = paths;
 
 export function createApp() {
   const app = express();
@@ -12,7 +15,7 @@ export function createApp() {
   app.use(cors({ origin: true, credentials: true }));
 
   app.use("/tools", toolsRoutes);
-
+  app.use("/imageUploads", express.static(imageUploadsDir));
   app.use(notFoundHandler);
   app.use(errorHandler);
 

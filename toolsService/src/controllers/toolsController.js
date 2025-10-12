@@ -37,16 +37,16 @@ export async function getTool(req, res) {
 }
 
 export async function createTool(req, res) {
-  let { name, description, images_urls, price, depozit, rented, rented_until } =
-    req.body;
-  // if (!id) id = uuidv4();
-
-  // const exists = await Tool.findOne({ id });
-  // if (exists)
-  //   return res
-  //     .status(409)
-  //     .json({ success: false, message: "Tool already exists" });
-
+  let { name, description, price, depozit, rented, rented_until } = req.body;
+  if (!name || !description || isNaN(price) || isNaN(depozit)) {
+    return res
+      .status(400)
+      .json({ success: false, message: "Missing required fields" });
+  }
+  const images_urls = [];
+  if (req.files.length !== 0) {
+    req.files.map((file) => images_urls.push(file.filename));
+  }
   const tool = new Tool({
     name,
     description,
@@ -58,7 +58,9 @@ export async function createTool(req, res) {
   });
   await tool.save();
 
-  res.status(201).json({ success: true, tool });
+  res
+    .status(201)
+    .json({ success: true, files: req.files, images_urls: images_urls });
 }
 
 export async function updateTool(req, res) {

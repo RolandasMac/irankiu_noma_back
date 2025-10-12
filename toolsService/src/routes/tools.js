@@ -14,9 +14,7 @@ import fs from "fs";
 import paths from "../../../config/paths.js";
 
 const { imageUploadsDir } = paths;
-
 const router = express.Router();
-
 const toolSchema = Joi.object({
   id: Joi.string().optional(),
   name: Joi.string().trim().min(1).required(),
@@ -73,14 +71,13 @@ const storage = multer.diskStorage({
     );
   },
 });
-
 // Sukuriame Multer instanciją su konfigūracija
 // 'upload' dabar yra middleware, kurį naudosime maršrutuose
 const upload = multer({
   storage: storage,
   limits: { fileSize: 1024 * 1024 * 5 }, // 5MB limitas
   fileFilter: (req, file, cb) => {
-    const filetypes = /pdf|jpg|gif/;
+    const filetypes = /jpeg|png|jpg|gif/;
     const mimetype = filetypes.test(file.mimetype);
     const extname = filetypes.test(
       path.extname(file.originalname).toLowerCase()
@@ -109,7 +106,7 @@ const upload = multer({
 
 router.get("/", listTools);
 router.get("/:id", getTool);
-router.post("/", validateBody(toolSchema), upload.array("images"), createTool);
+router.post("/", upload.array("images"), createTool); // reikia prideti ištrinta validate middleware
 router.post("/:id", validateBody(toolSchema), updateTool);
 router.delete("/:id", deleteTool);
 
