@@ -28,9 +28,40 @@ export async function getOrder(req, res) {
 }
 
 export async function createOrder(req, res) {
-  const order = new Order(req.body);
+  const {
+    client_id,
+    tool_id,
+    date,
+    date_until,
+    days,
+    discount,
+    pay_sum,
+    depozit,
+  } = req.body;
+
+  console.log(
+    "req.body",
+    client_id,
+    tool_id,
+    date,
+    date_until,
+    days,
+    discount,
+    pay_sum,
+    depozit
+  );
+  const order = new Order({
+    client_id,
+    tool_id,
+    date,
+    date_until,
+    days,
+    discount,
+    pay_sum,
+    depozit,
+  });
   await order.save();
-  res.status(201).json({ success: true, order });
+  res.status(201).json({ success: true, message: "Order created", order });
 }
 
 export async function updateOrder(req, res) {

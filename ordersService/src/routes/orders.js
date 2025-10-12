@@ -28,7 +28,7 @@ const orderSchema = Joi.object({
 
 router.get("/", listOrders);
 router.get("/:id", getOrder);
-router.post("/", validateBody(orderSchema), createOrder);
+router.post("/", createOrder);
 router.put("/:id", validateBody(orderSchema), updateOrder);
 router.delete("/:id", deleteOrder);
 

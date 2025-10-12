@@ -7,12 +7,12 @@ import {
   createDiscount,
   updateDiscount,
   deleteDiscount,
+  getDiscountsByToolId,
 } from "../controllers/discountsController.js";
-
 const router = express.Router();
 
 const discountSchema = Joi.object({
-  tols_id: Joi.array().items(Joi.string()).required(),
+  tools_id: Joi.array().items(Joi.string()).required(),
   min_days: Joi.number().required(),
   max_days: Joi.number().required(),
   discount: Joi.number().required(),
@@ -25,5 +25,6 @@ router.get("/:id", getDiscount);
 router.post("/", validateBody(discountSchema), createDiscount);
 router.put("/:id", validateBody(discountSchema), updateDiscount);
 router.delete("/:id", deleteDiscount);
+router.get("/toolId/:toolId", getDiscountsByToolId);
 
 export default router;

@@ -23,7 +23,7 @@ export async function listClients(req, res) {
 
 export async function getClient(req, res) {
   const { id } = req.params;
-  const client = await Client.findOne({ id }).lean();
+  const client = await Client.findOne({ id: id }).lean();
   if (!client)
     return res
       .status(404)

@@ -99,15 +99,16 @@ const orders = {
   tool_id: { type: String, required: true },
   date: { type: Date, required: true },
   // time: { type: Date, required: true },
-  discount: { type: Number, required: true },
-  docs_urls: { type: [{ String: String }], required: true }, // Gal reikia objekų array. Objektas: dokumento tipas:url
+  discount: { type: Number, required: true, default: 0 },
+  docs_urls: { type: [{ String: String }], required: false }, // Gal reikia objekų array. Objektas: dokumento tipas:url
   pay_sum: { type: Number, required: true },
-  paid: { type: Boolean, required: true },
+  paid: { type: Boolean, required: false },
   date_until: { type: Date, required: true },
-  returned: { type: Boolean, required: true },
+  returned: { type: Boolean, required: false },
+  depozit: { type: Number, required: false },
 };
 const discounts = {
-  tols_id: { type: [String], required: true },
+  tools_id: { type: [String], required: true },
   min_days: { type: Number, required: true },
   max_days: { type: Number, required: true },
   discount: { type: Number, required: true },
