@@ -1,5 +1,10 @@
 import Order from "../models/Order.js";
-
+import { sendOrderEvent } from "../events/sendOrderEvent.js";
+import { publishOrderCreated } from "../rabbit/publisher.js";
+import { getClientById } from "../rabbit/getClientById.js";
+import { getToolById } from "../rabbit/getToolById.js";
+import { getDiscount } from "../rabbit/getDiscountByToolId.js";
+import { generateDocs } from "../rabbit/generateDocs.js";
 export async function listOrders(req, res) {
   const page = Math.max(1, Number(req.query.page) || 1);
   const limit = Math.min(100, Number(req.query.limit) || 20);
@@ -60,7 +65,43 @@ export async function createOrder(req, res) {
     pay_sum,
     depozit,
   });
-  await order.save();
+  const createdOrder = await order.save();
+
+  // gauname kliento duomenis iš client servico
+  console.log("Prieš klientą", client_id);
+  const client = await getClientById(client_id);
+  console.log("client", client);
+  // gauname tools duomenis iš tools serviso
+  console.log("Prieš tools", tool_id);
+  const tool = await getToolById(tool_id);
+  console.log("tool", tool);
+  // gauname discounts duomenis iš discounts serviso
+  console.log("Prieš discounts", tool_id);
+  const discounts = await getDiscount(tool_id, days);
+  console.log("discounts", discounts);
+  // Paskaičiuojame kainą
+  const payment = days * tool.price * (1 - discount / 100);
+  console.log("payment", payment);
+
+  const orderFullData = {
+    id: createdOrder._id,
+    client,
+    tool,
+    days,
+    discount,
+    payment,
+  };
+  console.log("orderFullData", orderFullData);
+
+  // Duodama komanda generuoti dokumentus
+  console.log("Duodama komanda generuoti dokumentus");
+  const docs = await generateDocs(orderFullData);
+  console.log("docs", docs);
+  const updatedOrder = await Order.findByIdAndUpdate(createdOrder._id, {
+    docs_urls: docs,
+  });
+  // await sendOrderEvent(order); // <--- čia išsiunčiam eventą
+  // await publishOrderCreated(order);
   res.status(201).json({ success: true, message: "Order created", order });
 }
 

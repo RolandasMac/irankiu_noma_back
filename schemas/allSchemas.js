@@ -100,7 +100,13 @@ const orders = {
   date: { type: Date, required: true },
   // time: { type: Date, required: true },
   discount: { type: Number, required: true, default: 0 },
-  docs_urls: { type: [{ String: String }], required: false }, // Gal reikia objekų array. Objektas: dokumento tipas:url
+  docs_urls: [
+    {
+      _id: false, // nekuria automatinio _id kiekvienam objektui
+      type: { type: String, required: true },
+      url: { type: String, required: true },
+    },
+  ],
   pay_sum: { type: Number, required: true },
   paid: { type: Boolean, required: false },
   date_until: { type: Date, required: true },
