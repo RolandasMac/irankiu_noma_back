@@ -62,7 +62,7 @@ export async function generateFromTemplate(order) {
       linebreaks: true,
     });
 
-    doc.render(order.order.client);
+    doc.render(order.order);
 
     const buf = doc.getZip().generate({ type: "nodebuffer" });
     const fileName = `${type}_${order.order.id}.docx`;
