@@ -11,7 +11,7 @@ export function createApp() {
   app.use(express.urlencoded({ extended: true }));
   app.use(cors({ origin: true, credentials: true }));
 
-  app.use("/discounts", discountsRoutes);
+  app.use("/", discountsRoutes);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

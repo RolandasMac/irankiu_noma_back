@@ -21,7 +21,7 @@ export async function uploadTemplate(req, res) {
 
 export async function getTemplates(req, res) {
   try {
-    const files = listTemplates();
+    const files = listTemplates;
     res.json({ success: true, templates: files });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });

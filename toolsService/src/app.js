@@ -14,7 +14,7 @@ export function createApp() {
   app.use(express.urlencoded({ extended: true }));
   app.use(cors({ origin: true, credentials: true }));
 
-  app.use("/tools", toolsRoutes);
+  app.use("/", toolsRoutes);
   app.use("/imageUploads", express.static(imageUploadsDir));
   app.use(notFoundHandler);
   app.use(errorHandler);

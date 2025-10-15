@@ -121,10 +121,49 @@ const discounts = {
   valid_from: { type: Date, required: true },
   valid_until: { type: Date, required: true },
 };
+
+const user = {
+  name: {
+    type: String,
+    required: true,
+  },
+  email: {
+    type: String,
+    required: true,
+  },
+  password: {
+    type: String,
+    required: true,
+  },
+  roles: {
+    type: [String],
+    required: true,
+    default: ["user"],
+  },
+  phoneNr: {
+    type: [String],
+    required: false,
+  },
+  photo: {
+    type: String,
+    required: false,
+  },
+  carNr: {
+    type: [String],
+    required: false,
+  },
+  lastloggedAt: {
+    type: Number,
+    required: true,
+    default: new Date(),
+  },
+};
+
 module.exports = {
   post,
   clients,
   tools,
   orders,
   discounts,
+  user,
 };

@@ -1,0 +1,62 @@
+Error sending verification email: Error: Required parameters are missing
+    at Object.sendVerifyEmail (D:\It projektai\backProjektas\services\authService\plugins\emailPlugin.js:29:15)
+    at exports.sendEmailCode (D:\It projektai\backProjektas\services\authService\controllers\authController.js:108:39)
+    at Layer.handle [as handle_request] (D:\It projektai\backProjektas\services\authService\node_modules\express\lib\router\layer.js:95:5)
+    at next (D:\It projektai\backProjektas\services\authService\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (D:\It projektai\backProjektas\services\authService\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (D:\It projektai\backProjektas\services\authService\node_modules\express\lib\router\layer.js:95:5)
+    at D:\It projektai\backProjektas\services\authService\node_modules\express\lib\router\index.js:284:15
+    at Function.process_params (D:\It projektai\backProjektas\services\authService\node_modules\express\lib\router\index.js:346:12)
+    at next (D:\It projektai\backProjektas\services\authService\node_modules\express\lib\router\index.js:280:10)
+    at Function.handle (D:\It projektai\backProjektas\services\authService\node_modules\express\lib\router\index.js:175:3)
+Error: Failed to send email. Please try again.
+    at Object.sendVerifyEmail (D:\It projektai\backProjektas\services\authService\plugins\emailPlugin.js:60:13)
+    at exports.sendEmailCode (D:\It projektai\backProjektas\services\authService\controllers\authController.js:108:39)
+    at Layer.handle [as handle_request] (D:\It projektai\backProjektas\services\authService\node_modules\express\lib\router\layer.js:95:5)
+    at next (D:\It projektai\backProjektas\services\authService\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (D:\It projektai\backProjektas\services\authService\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (D:\It projektai\backProjektas\services\authService\node_modules\express\lib\router\layer.js:95:5)
+    at D:\It projektai\backProjektas\services\authService\node_modules\express\lib\router\index.js:284:15
+    at Function.process_params (D:\It projektai\backProjektas\services\authService\node_modules\express\lib\router\index.js:346:12)
+    at next (D:\It projektai\backProjektas\services\authService\node_modules\express\lib\router\index.js:280:10)
+    at Function.handle (D:\It projektai\backProjektas\services\authService\node_modules\express\lib\router\index.js:175:3)
+Error sending verification email: Error: Required parameters are missing
+    at Object.sendVerifyEmail (D:\It projektai\backProjektas\services\authService\plugins\emailPlugin.js:29:15)
+    at exports.sendEmailCode (D:\It projektai\backProjektas\services\authService\controllers\authController.js:107:39)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error: Failed to send email. Please try again.
+    at Object.sendVerifyEmail (D:\It projektai\backProjektas\services\authService\plugins\emailPlugin.js:60:13)
+    at exports.sendEmailCode (D:\It projektai\backProjektas\services\authService\controllers\authController.js:107:39)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error sending verification email: Error: Required parameters are missing
+    at Object.sendVerifyEmail (D:\It projektai\backProjektas\services\authService\plugins\emailPlugin.js:29:15)
+    at exports.sendEmailCode (D:\It projektai\backProjektas\services\authService\controllers\authController.js:110:39)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error: Failed to send email. Please try again.
+    at Object.sendVerifyEmail (D:\It projektai\backProjektas\services\authService\plugins\emailPlugin.js:60:13)
+    at exports.sendEmailCode (D:\It projektai\backProjektas\services\authService\controllers\authController.js:110:39)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error sending verification email: Error: Required parameters are missing
+    at Object.sendVerifyEmail (D:\It projektai\backProjektas\services\authService\plugins\emailPlugin.js:29:15)
+    at exports.sendEmailCode (D:\It projektai\backProjektas\services\authService\controllers\authController.js:110:39)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error: Failed to send email. Please try again.
+    at Object.sendVerifyEmail (D:\It projektai\backProjektas\services\authService\plugins\emailPlugin.js:60:13)
+    at exports.sendEmailCode (D:\It projektai\backProjektas\services\authService\controllers\authController.js:110:39)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error sending verification email: Error: Required parameters are missing
+    at Object.sendVerifyEmail (D:\It projektai\backProjektas\services\authService\plugins\emailPlugin.js:29:15)
+    at exports.sendEmailCode (D:\It projektai\backProjektas\services\authService\controllers\authController.js:110:39)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error: Failed to send email. Please try again.
+    at Object.sendVerifyEmail (D:\It projektai\backProjektas\services\authService\plugins\emailPlugin.js:60:13)
+    at exports.sendEmailCode (D:\It projektai\backProjektas\services\authService\controllers\authController.js:110:39)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error sending verification email: Error: Required parameters are missing
+    at Object.sendVerifyEmail (D:\It projektai\backProjektas\services\authService\plugins\emailPlugin.js:29:15)
+    at exports.sendEmailCode (D:\It projektai\backProjektas\services\authService\controllers\authController.js:110:39)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error: Failed to send email. Please try again.
+    at Object.sendVerifyEmail (D:\It projektai\backProjektas\services\authService\plugins\emailPlugin.js:60:13)
+    at exports.sendEmailCode (D:\It projektai\backProjektas\services\authService\controllers\authController.js:110:39)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)

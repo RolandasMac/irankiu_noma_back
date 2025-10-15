@@ -36,6 +36,8 @@ import Docxtemplater from "docxtemplater";
 import libre from "libreoffice-convert";
 import paths from "../../../config/paths.js";
 const { templatesDir, generatedDir } = paths;
+
+// Nurodom statiškai
 export const listTemplates = {
   sutartis: "1760029140328-nomas ligums1.docx",
   // sutartis: "sutartis_template.docx",
@@ -43,6 +45,10 @@ export const listTemplates = {
   // kvitas: "kvitas_template.docx",
 };
 
+// Nurodom dinamiškai
+// export function listTemplates() {
+//   return fs.readdirSync(templatesDir).filter((f) => f.endsWith(".docx"));
+// }
 // const generatedDir = path.resolve("generated");
 
 export async function generateFromTemplate(order) {

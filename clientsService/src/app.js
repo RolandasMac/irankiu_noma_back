@@ -11,7 +11,7 @@ export function createApp() {
   app.use(express.urlencoded({ extended: true }));
   app.use(cors({ origin: true, credentials: true }));
 
-  app.use("/clients", clientsRoutes);
+  app.use("/", clientsRoutes);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

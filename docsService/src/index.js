@@ -18,7 +18,7 @@ console.log("ENV loaded:", process.env.NODE_ENV);
 const PORT = process.env.DOCS_PORT || 4006;
 const app = express();
 app.use(cors());
-app.use("/docs", docsRoutes);
+app.use("/", docsRoutes);
 
 app.listen(PORT, async () => {
   console.log(`📄 Docs service running at http://localhost:${PORT}`);
