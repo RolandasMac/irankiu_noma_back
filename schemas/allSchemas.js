@@ -86,13 +86,15 @@ const clients = {
 };
 const tools = {
   // tool_id: { type: String, required: true },
-  name: { type: String, required: true },
+  toolName: { type: String, required: true },
   description: { type: [String], required: true },
   images_urls: { type: [String], required: true },
-  price: { type: Number, required: true },
+  toolPrice: { type: Number, required: true },
   depozit: { type: Number, required: true },
   rented: { type: Boolean, required: true, default: false },
   rented_until: { type: Date, required: false },
+  signs: { type: [String], required: false, default: "" },
+  rentPrice: { type: Number, required: true },
 };
 const orders = {
   client_id: { type: String, required: true },

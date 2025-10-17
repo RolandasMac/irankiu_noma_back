@@ -22,7 +22,8 @@ const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const dotenv = require("dotenv");
 const path = require("path");
-
+const { paths } = require("../config/paths.js");
+const { imageUploadsDir } = paths;
 // viršuje pridėk importus
 const axios = require("axios");
 
@@ -64,6 +65,7 @@ app.use(
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "Cookie", "Set-Cookie"],
     credentials: true,
+    exposedHeaders: ["Set-Cookie"],
   })
 );
 
@@ -265,7 +267,7 @@ function setCookiesFromRefresh(req, res, data) {
 
 const setupProxy = (port, routePrefix, requiresAuth = false) => {
   const middlewares = [];
-
+  // console.log("proxy middlewares pradzia");
   if (requiresAuth) {
     middlewares.push(ensureTokensMiddleware);
 
@@ -285,42 +287,42 @@ const setupProxy = (port, routePrefix, requiresAuth = false) => {
   }
 
   middlewares.push(injectAuthUserToHeaders);
-
+  // middlewares.push((req, res, next) => {
+  //   console.log("proxy middlewares pabaiga");
+  //   next();
+  // });
   middlewares.push(
     createProxyMiddleware({
       target: `http://${BACKHOST}:${port}`,
       changeOrigin: true,
-      cookieDomainRewrite: "", // pašalina backend domeną, leisim patys nurodyti
-      selfHandleResponse: false, // proxy pats tvarko response
-      onProxyRes: (proxyRes, req, res) => {
-        let cookies = proxyRes.headers["set-cookie"];
-        if (cookies) {
-          // console.log("Gauti Set-Cookie iš backend:", cookies);
-
-          const fixedCookies = cookies.map((cookie) => {
-            // Išmetam neteisingus domain/us
-            // cookie = cookie.replace(/Domain=[^;]+/i, "");
-
-            // Užtikrinam, kad būtų teisingi atributai
-            if (!/; *HttpOnly/i.test(cookie)) {
-              cookie += "; HttpOnly";
-            }
-            if (!/; *Secure/i.test(cookie)) {
-              cookie += "; Secure";
-            }
-            if (!/; *SameSite=None/i.test(cookie)) {
-              cookie += "; SameSite=None";
-            }
-            // Priededam savo domeną
-            // cookie += "; Domain=kvieciu-22.macrol.lt";
-
-            return cookie;
-          });
-
-          res.setHeader("Set-Cookie", fixedCookies);
-        }
-      },
-
+      cookieDomainRewrite: false, // pašalina backend domeną, leisim patys nurodyti
+      // selfHandleResponse: false, // proxy pats tvarko response
+      // onProxyRes: (proxyRes, req, res) => {
+      //   console.log("dfgdfgdfgdfg");
+      //   // proxyRes.headers["x-added"] = "foobar"; // add new header to response
+      //   // delete proxyRes.headers["x-removed"]; // remove header from response
+      // },
+      // onProxyReq: (proxyReq, req, res) => {
+      //   // add custom header to request
+      //   console.log("Bybis kamine");
+      //   // or log the req
+      // },
+      // onProxyRes: (proxyRes, req, res) => {
+      //   const cookies = proxyRes.headers["set-cookie"];
+      //   console.log("Gaidys");
+      //   console.log(">>> proxyRes.headers['set-cookie'] =", cookies);
+      //   if (cookies && cookies.length) {
+      //     const fixedCookies = cookies.map((cookie) => {
+      //       cookie = cookie.replace(/Domain=[^;]+/i, ""); // išmetam domeną, jei ne tavo
+      //       if (!/; *Secure/i.test(cookie)) cookie += "; Secure";
+      //       if (!/; *HttpOnly/i.test(cookie)) cookie += "; HttpOnly";
+      //       if (!/; *SameSite=None/i.test(cookie)) cookie += "; SameSite=None";
+      //       // cookie += "; Domain=kvieciu-22.macrol.lt"; // jei reikia priverstinai nustatyti domeną
+      //       return cookie;
+      //     });
+      //     res.setHeader("Set-Cookie", fixedCookies);
+      //   }
+      // },
       // ************Keičia atsakymą į frontend************
 
       // selfHandleResponse: true, // res.end() will be called internally by responseInterceptor()
@@ -336,17 +338,17 @@ const setupProxy = (port, routePrefix, requiresAuth = false) => {
       //         const responseString = responseBuffer.toString("utf8");
 
       //         // pabandom parse kaip JSON
-      //         let data = JSON.parse(responseString);
+      //         // let data = JSON.parse(responseString);
 
-      //         // prie atsakymo pridėk user info iš req.user (ar kitur)
-      //         data.logedUser = req.user || {
-      //           id: "123",
-      //           roles: [],
-      //           name: "Gaidys",
-      //         };
-
+      //         // // prie atsakymo pridėk user info iš req.user (ar kitur)
+      //         // data.logedUser = req.user || {
+      //         //   id: "123",
+      //         //   roles: [],
+      //         //   name: "Gaidys",
+      //         // };
+      //         console.log("Gaidyyyyyyyysss!");
       //         // grąžinam atgal kaip JSON string
-      //         return JSON.stringify(data);
+      //         // return JSON.stringify(data);
       //       } catch (err) {
       //         console.error("Proxy response parse error:", err.message);
       //         // jeigu atsakymas ne JSON, grąžinam originalų tekstą
@@ -360,7 +362,11 @@ const setupProxy = (port, routePrefix, requiresAuth = false) => {
       // },
     })
   );
-
+  // middlewares.push((req, res, next) => {
+  //   console.log("proxy middlewares gaidyyys!!!");
+  //   next();
+  // });
+  // console.log("Proxy veikia", middlewares);
   return middlewares;
 };
 
@@ -383,6 +389,16 @@ const allowlist = [
   //   /^\/vote-public\/one-vote?[^/]+$/,
 ];
 
+// app.use(
+//   "/test",
+//   createProxyMiddleware({
+//     target: `http://localhost:4003/`,
+//     changeOrigin: true,
+//     onProxyReq: (proxyReq, req, res) => console.log("ProxyReq called"),
+//     onProxyRes: (proxyRes, req, res) => console.log("ProxyRes called"),
+//   })
+// );
+
 app.use((req, res, next) => {
   // 1️⃣ Jei kelias neturi "-public" → leidžiam
   if (!req.path.includes("-public")) {
@@ -402,7 +418,22 @@ app.use((req, res, next) => {
   });
 });
 
-app.use("/auth", ...setupProxy(AUTHPORT, "auth", true));
+// Patiekti įkeltus failus (kad būtų galima pasiekti nuotraukas per URL)
+app.use("/imageUploads/", express.static(imageUploadsDir));
+app.use(
+  "/auth",
+  // (req, res, next) => {
+  //   const midllewares = setupProxy(AUTHPORT, "auth", true);
+  //   console.log(
+  //     ">>> /auth middleware reached:",
+  //     req.method,
+  //     req.url,
+  //     midllewares
+  //   );
+  //   next();
+  // },
+  ...setupProxy(AUTHPORT, "auth", true)
+);
 app.use("/auth-public", ...setupProxy(AUTHPORT, "auth", false));
 
 app.use("/clients-public", ...setupProxy(CLIENTPORT, "clients-public", false));

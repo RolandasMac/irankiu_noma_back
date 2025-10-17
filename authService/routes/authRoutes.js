@@ -9,6 +9,12 @@ router.post("/test", authController.test);
 // router.get("/getsetings", loginMiddleware, authController.getsetings);
 router.get("/getusers", checkRole(["admin"]), authController.getusers);
 router.get("/logout", authController.logout);
+// router.get("/logout", (req, res) => {
+//   console.log("BACKEND logout pasiektas");
+//   res.cookie("authtoken", "", { maxAge: 0 });
+//   res.cookie("refreshToken", "", { maxAge: 0 });
+//   res.status(200).json({ success: true });
+// });
 // router.get("/autologin", loginMiddleware, authController.autologin);
 router.post("/sendemailcode", authController.sendEmailCode);
 router.post("/createuser", authController.createUser);

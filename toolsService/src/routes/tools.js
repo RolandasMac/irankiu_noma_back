@@ -18,13 +18,17 @@ import { saveFiles } from "../middleware/saveFiles.js";
 const { imageUploadsDir } = paths;
 const router = express.Router();
 const toolSchema = Joi.object({
-  name: Joi.string().trim().min(1).required(),
-  description: Joi.array()
-    .items(Joi.string().trim().min(1))
-    .optional()
-    .default([]),
+  toolName: Joi.string().trim().min(1).required(),
+  signs: Joi.string().trim().min(1),
+  description: Joi.alternatives()
+    .try(
+      Joi.string().trim().min(1),
+      Joi.array().items(Joi.string().trim().min(1))
+    )
+    .required(),
   images_urls: Joi.array().items(Joi.string()).optional().default([]),
-  price: Joi.number().optional(),
+  toolPrice: Joi.number().optional(),
+  rentPrice: Joi.number().optional(),
   depozit: Joi.number().optional(),
   rented: Joi.boolean().optional().default(false),
   rented_until: Joi.date().optional().allow(null),

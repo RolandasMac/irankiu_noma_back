@@ -41,9 +41,24 @@ export async function getTool(req, res) {
 }
 
 export async function createTool(req, res) {
-  let { name, description, price, depozit, rented, rented_until, images_urls } =
-    req.body;
-  if (!name || !description || isNaN(price) || isNaN(depozit)) {
+  let {
+    toolName,
+    description,
+    signs,
+    toolPrice,
+    rentPrice,
+    depozit,
+    rented,
+    rented_until,
+    images_urls,
+  } = req.body;
+  if (
+    !toolName ||
+    !description ||
+    isNaN(toolPrice) ||
+    isNaN(rentPrice) ||
+    isNaN(depozit)
+  ) {
     return res
       .status(400)
       .json({ success: false, message: "Missing required fields" });
@@ -53,10 +68,12 @@ export async function createTool(req, res) {
   //   req.files.map((file) => images_urls.push(file.filename));
   // }
   const tool = new Tool({
-    name,
+    toolName,
     description,
+    signs,
+    toolPrice,
+    rentPrice,
     images_urls,
-    price,
     depozit,
     rented,
     rented_until,
@@ -65,7 +82,12 @@ export async function createTool(req, res) {
 
   res
     .status(201)
-    .json({ success: true, files: req.files, images_urls: images_urls });
+    .json({
+      success: true,
+      message: "Tool created successfully",
+      files: req.files,
+      images_urls: images_urls,
+    });
 }
 
 export async function updateTool(req, res) {

@@ -149,14 +149,14 @@ exports.login = async (req, res) => {
     if (!user) {
       return res
         .status(401)
-        .json({ success: false, message: "Neteisingi duomenys" });
+        .json({ success: false, message: "Neteisingi duomenys1" });
     }
 
     const match = await bcrypt.compare(password, user.password);
     if (!match) {
       return res
         .status(401)
-        .json({ success: false, message: "Neteisingi duomenys" });
+        .json({ success: false, message: "Neteisingi duomenys2" });
     }
 
     const accessToken = generateAccessToken(user);
@@ -168,17 +168,19 @@ exports.login = async (req, res) => {
     // Siunčiam abu tokenus kaip httpOnly cookies
     res.cookie("authtoken", accessToken, {
       httpOnly: true,
-      secure: true,
-      sameSite: "none",
+      secure: false,
+      sameSite: "lax",
       maxAge: 60 * 60 * 1000, // 1h
+      // domain: ".localhost",
       path: "/",
     });
 
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
-      secure: true,
-      sameSite: "none",
+      secure: false,
+      sameSite: "lax",
       maxAge: 30 * 24 * 60 * 60 * 1000, // 30d
+      // domain: ".localhost",
       path: "/",
     });
 
@@ -290,14 +292,29 @@ exports.test = async (req, res) => {
   }
 };
 exports.logout = async (req, res) => {
+  const cookie = req.cookies;
+  console.log("Logout veikia", cookie);
   try {
     // const token = req.cookies.authtokenas_Rolas;
     // console.log("Gaidys veikia");
-    res.clearCookie("authtoken");
-    res.clearCookie("refreshToken");
+    res.clearCookie("authtoken", {
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+      // domain: ".localhost",
+
+      path: "/",
+    });
+    res.clearCookie("refreshToken", {
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+      // domain: ".localhost",
+      path: "/",
+    });
     res.status(200).json({
       success: true,
-      message: "Atsijungimas sėkmingas",
+      message: "Atsijungimas sėkmingas!",
       // user: req.user,
     });
   } catch (err) {

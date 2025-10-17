@@ -26,7 +26,7 @@ export async function getClient(req, res) {
   const client = await Client.findOne({ id: id }).lean();
   if (!client)
     return res
-      .status(404)
+      .status(200)
       .json({ success: false, message: "Client not found" });
   res.json({ success: true, client });
 }
