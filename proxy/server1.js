@@ -25,6 +25,15 @@ import paths from "../config/paths.js"; // tavo failas su direktorijomis
 const { imageUploadsDir } = paths;
 
 // =======================================================
+//  SSL Sertifikatai
+// =======================================================
+
+const pathServ = "/etc/letsencrypt/live/kvieciu-22.macrol.lt/";
+const privateKey = fs.readFileSync(`${pathServ}privkey.pem`);
+const certificate = fs.readFileSync(`${pathServ}fullchain.pem`);
+const credentials = { key: privateKey, cert: certificate };
+
+// =======================================================
 //  DIR KONFIGŪRACIJA
 // =======================================================
 const __filename = fileURLToPath(import.meta.url);
@@ -283,10 +292,12 @@ app.use("/docs-public", ...setupProxy(DOCSPORT, "docs-public", false));
 // =======================================================
 //  SERVER START
 // =======================================================
-app.listen(PORT, () => {
-  console.log(`✅ Proxy Started at: ${BACKHOST}:${PORT}`);
-});
+// app.listen(PORT, () => {
+//   console.log(`✅ Proxy Started at: ${BACKHOST}:${PORT}`);
+// });
 
 // Jei reikėtų HTTPS (kai turėsi sertifikatus)
-// const httpsServer = https.createServer(credentials, app);
-// httpsServer.listen(PORT);
+const httpsServer = https.createServer(credentials, app);
+httpsServer.listen(PORT, () => {
+  console.log(`✅ Proxy Started at: ${BACKHOST}:${PORT}`);
+});
