@@ -1,4 +1,6 @@
-const nodemailer = require("nodemailer");
+// const nodemailer = require("nodemailer");
+
+import nodemailer from "nodemailer";
 // const Setings = require("../models/setingsSchema.js");
 const emailTemplate = (verificationCode) => `
    <div style="padding: 16px; text-align: center; font-family: Arial, sans-serif;">
@@ -58,7 +60,7 @@ const emailPlugin = {
     if (!emailMessage) {
       throw new Error("Nepavyko išsiųsti el. paštu patvirtinimo kode");
     }
-console.log("Email:",emailMessage);
+    console.log("Email:", emailMessage);
     return { message: "Patvirtinimo kodas išsiųstas sėkmingai" };
   },
 };

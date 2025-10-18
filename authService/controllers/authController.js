@@ -1,21 +1,39 @@
 // controllers/userController.js
 
-const User = require("../models/userSchema");
-const bcrypt = require("bcrypt");
-// const emailPlugin = require("../plugins/emailPlugin");
-const authPlugin = require("../plugins/authPlugin");
-// const { newError } = require("../plugins/helper");
-// const { createSetings, getSetings } = require("../plugins/setings");
-const jwt = require("jsonwebtoken");
-const dotenv = require("dotenv");
-const path = require("path");
+// const User = require("../models/userSchema");
+// const bcrypt = require("bcrypt");
+// // const emailPlugin = require("../plugins/emailPlugin");
+// const authPlugin = require("../plugins/authPlugin");
+// // const { newError } = require("../plugins/helper");
+// // const { createSetings, getSetings } = require("../plugins/setings");
+// const jwt = require("jsonwebtoken");
+// const dotenv = require("dotenv");
+// const path = require("path");
+// dotenv.config({ path: path.resolve(__dirname, "../../.env") });
+// const { verify } = require("crypto");
+
+import { User } from "../models/userSchema.js";
+import bcrypt from "bcrypt";
+// import emailPlugin from "../plugins/emailPlugin.js";
+import { authPlugin } from "../plugins/authPlugin.js";
+// import { newError } from "../plugins/helper.js";
+// import { createSetings, getSetings } from "../plugins/setings.js";
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+import path from "path";
+import { verify } from "crypto";
+
+// Load environment variables from a .env file
+import { fileURLToPath } from "url";
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.resolve(__dirname, "../../.env") });
+
 const HOST_COKIE = process.env.HOSTCOKIE;
 // const {
 //   sendCoteMessageToError,
 //   sendCoteMessageToEmail,
 // } = require("../plugins/innerMessages");
-const { verify } = require("crypto");
+
 // const Setings = require("../models/setingsSchema.js");
 // const { user } = require("../../../schemas/allSchemas.js");
 // const UAParser = require("ua-parser-js");
@@ -49,7 +67,7 @@ function generateRefreshToken(user) {
   return jwt.sign({ id: user.id }, JWT_REFRESH_SECRET, { expiresIn: "30d" });
 }
 
-exports.sendEmailCode = async (req, res) => {
+export const sendEmailCode = async (req, res) => {
   try {
     const { email } = req.body;
     if (!email) {
@@ -91,7 +109,7 @@ exports.sendEmailCode = async (req, res) => {
     res.status(500).json({ success: false, message: err.message });
   }
 };
-exports.createUser = async (req, res) => {
+export const createUser = async (req, res) => {
   try {
     // console.log("Veikia", req.body);
     // return res.status(200).json({ message: "Veikia", success: true });
@@ -140,10 +158,10 @@ exports.createUser = async (req, res) => {
   }
 };
 
-exports.login = async (req, res) => {
+export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-
+    console.log("login data", email, password);
     // Surandi user DB pagal email
     const user = await User.findOne({ email });
     if (!user) {
@@ -151,14 +169,14 @@ exports.login = async (req, res) => {
         .status(401)
         .json({ success: false, message: "Neteisingi duomenys1" });
     }
-
+    console.log("User", user);
     const match = await bcrypt.compare(password, user.password);
     if (!match) {
       return res
         .status(401)
         .json({ success: false, message: "Neteisingi duomenys2" });
     }
-
+    console.log("Dar veikia", JWT_SECRET);
     const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user);
 
@@ -200,7 +218,7 @@ exports.login = async (req, res) => {
   }
 };
 
-exports.testas = async (req, res) => {
+export const testas = async (req, res) => {
   try {
     const userAgent = req.headers["user-agent"];
     console.log(`User-Agent: ${userAgent}`);
@@ -255,7 +273,7 @@ exports.testas = async (req, res) => {
     res.status(500).json({ success: false, message: err.message });
   }
 };
-exports.test = async (req, res) => {
+export const test = async (req, res) => {
   // const data = req.body.data;
   // console.log("User: ", req.headers);
   return res.status(200).json({
@@ -291,7 +309,7 @@ exports.test = async (req, res) => {
     res.status(500).json({ success: false, message: err.message });
   }
 };
-exports.logout = async (req, res) => {
+export const logout = async (req, res) => {
   const cookie = req.cookies;
   console.log("Logout veikia", cookie);
   try {
@@ -329,7 +347,7 @@ exports.logout = async (req, res) => {
   }
 };
 
-exports.getusers = async (req, res) => {
+export const getusers = async (req, res) => {
   const query = req.query;
   if (!query) {
     throw new Error("Neperduoti jokie užklausos parametrai!");
@@ -372,7 +390,7 @@ exports.getusers = async (req, res) => {
     res.status(500).json({ success: false, message: err.message });
   }
 };
-exports.updateuser = async (req, res) => {
+export const updateuser = async (req, res) => {
   try {
     const { id, name, email, roles } = req.body;
 
@@ -403,7 +421,7 @@ exports.updateuser = async (req, res) => {
     res.status(500).json({ success: false, message: err.message });
   }
 };
-exports.deleteuser = async (req, res) => {
+export const deleteuser = async (req, res) => {
   try {
     const { id } = req.body;
     if (!id) {
@@ -430,7 +448,7 @@ exports.deleteuser = async (req, res) => {
   }
 };
 
-exports.refresh = async (req, res) => {
+export const refresh = async (req, res) => {
   try {
     // Variantai: refresh token gali atkeliauti body, header arba cookie.
     // console.log("cookie", req.cookies);

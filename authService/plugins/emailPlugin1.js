@@ -1,9 +1,17 @@
-const nodemailer = require("nodemailer");
-const { google } = require("googleapis");
-const dotenv = require("dotenv");
-const path = require("path");
-dotenv.config({ path: path.resolve(__dirname, "../../../.env") });
+// const nodemailer = require("nodemailer");
+// const { google } = require("googleapis");
+// const dotenv = require("dotenv");
+// const path = require("path");
+// dotenv.config({ path: path.resolve(__dirname, "../../../.env") });
 
+import nodemailer from "nodemailer";
+import { google } from "googleapis";
+import dotenv from "dotenv";
+import path from "path";
+
+dotenv.config({
+  path: path.resolve(new URL("../../../.env", import.meta.url).pathname),
+});
 const CLIENT_ID = process.env.EMAIL_CLIENT_ID;
 const CLIENT_SECRET = process.env.EMAIL_CLIENT_SECRET;
 const REFRESH_TOKEN = process.env.EMAIL_REFRESH_TOKEN;

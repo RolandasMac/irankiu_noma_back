@@ -1,5 +1,5 @@
 // middleware/checkRole.js
-function checkRole(allowedRoles = []) {
+export function checkRole(allowedRoles = []) {
   return (req, res, next) => {
     try {
       const rolesHeader = req.headers["x-user-roles"];
@@ -27,4 +27,4 @@ function checkRole(allowedRoles = []) {
     }
   };
 }
-module.exports = { checkRole };
+// module.exports = checkRole;

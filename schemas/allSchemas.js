@@ -124,7 +124,7 @@ const discounts = {
   valid_until: { type: Date, required: true },
 };
 
-const user = {
+export const user = {
   name: {
     type: String,
     required: true,
@@ -161,11 +161,4 @@ const user = {
   },
 };
 
-module.exports = {
-  post,
-  clients,
-  tools,
-  orders,
-  discounts,
-  user,
-};
+// export { post, clients, tools, orders, discounts, user };

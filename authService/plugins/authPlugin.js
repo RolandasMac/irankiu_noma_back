@@ -1,7 +1,7 @@
 let data = [];
 let recovery = [];
 
-module.exports = {
+export const authPlugin = {
   saveEmail: (email, code, type) => {
     if (type === `recovery`) {
       recovery = recovery.filter((x) => x.email !== email); //del old

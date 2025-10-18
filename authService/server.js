@@ -1,21 +1,42 @@
 // server.js
-const fs = require("fs");
-// const http = require("http");
-// const https = require("https");
-// const privateKey = fs.readFileSync("../../cert/private.key", "utf8");
-// const certificate = fs.readFileSync("../../cert/certificate.crt", "utf8");
+// const fs = require("fs");
+// // const http = require("http");
+// // const https = require("https");
+// // const privateKey = fs.readFileSync("../../cert/private.key", "utf8");
+// // const certificate = fs.readFileSync("../../cert/certificate.crt", "utf8");
+
+// // const credentials = { key: privateKey, cert: certificate };
+
+// const express = require("express");
+// const mongoose = require("mongoose");
+// const dotenv = require("dotenv");
+// const authRouter = require("./routes/authRoutes");
+// const path = require("path");
+// const cors = require("cors");
+// const cookieParser = require("cookie-parser");
+
+// // Load environment variables from a .env file
+// dotenv.config({ path: path.resolve(__dirname, "../.env") });
+
+import fs from "fs";
+// import http from "http";
+// import https from "https";
+// const privateKey = fs.readFileSync(new URL("../../cert/private.key", import.meta.url), "utf8");
+// const certificate = fs.readFileSync(new URL("../../cert/certificate.crt", import.meta.url), "utf8");
 
 // const credentials = { key: privateKey, cert: certificate };
 
-const express = require("express");
-const mongoose = require("mongoose");
-const dotenv = require("dotenv");
-const authRouter = require("./routes/authRoutes");
-const path = require("path");
-const cors = require("cors");
-const cookieParser = require("cookie-parser");
+import express from "express";
+import mongoose from "mongoose";
+import dotenv from "dotenv";
+import authRouter from "./routes/authRoutes.js";
+import path from "path";
+import cors from "cors";
+import cookieParser from "cookie-parser";
 
 // Load environment variables from a .env file
+import { fileURLToPath } from "url";
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
 const app = express();

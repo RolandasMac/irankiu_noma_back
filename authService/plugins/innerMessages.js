@@ -1,4 +1,5 @@
-const cote = require("cote");
+// const cote = require("cote");
+import cote from "cote";
 const clientAuth = new cote.Requester({
   name: "AuthValidate",
   key: "Authentification_Service_key",
