@@ -28,7 +28,7 @@ const { imageUploadsDir } = paths;
 //  SSL Sertifikatai
 // =======================================================
 
-const pathServ = "/etc/letsencrypt/live/kvieciu-22.macrol.lt/";
+const pathServ = "/etc/letsencrypt/live/nuoma.macrol.lt/";
 const privateKey = fs.readFileSync(`${pathServ}privkey.pem`);
 const certificate = fs.readFileSync(`${pathServ}fullchain.pem`);
 const credentials = { key: privateKey, cert: certificate };
