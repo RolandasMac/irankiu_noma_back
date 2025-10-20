@@ -39,8 +39,8 @@ const { templatesDir, generatedDir } = paths;
 
 // Nurodom statiškai
 export const listTemplates = {
-  sutartis: "1760029140328-nomas ligums1.docx",
-  // sutartis: "sutartis_template.docx",
+  sutartis: "Nomas ligums.docx",
+  kvitas: "Kvits.docx",
   // saskaita: "saskaita_template.docx",
   // kvitas: "kvitas_template.docx",
 };
@@ -55,9 +55,10 @@ export async function generateFromTemplate(order) {
   if (!fs.existsSync(generatedDir)) fs.mkdirSync(generatedDir);
 
   const results = [];
-
+  const createdData = createOrderdata(order.order);
   for (const [type, templateName] of Object.entries(listTemplates)) {
     console.log("templateName", templateName, order);
+    console.log("duomenys po paruošimo funkcijos", createdData);
     // const templatePath = path.resolve("templates", templateName);
     const templatePath = path.join(templatesDir, templateName);
     const content = fs.readFileSync(templatePath, "binary");
@@ -68,10 +69,10 @@ export async function generateFromTemplate(order) {
       linebreaks: true,
     });
 
-    doc.render(order.order.client);
+    doc.render(createdData);
 
     const buf = doc.getZip().generate({ type: "nodebuffer" });
-    const fileName = `${type}_${order.order.id}.docx`;
+    const fileName = `${type}_${createdData.id}.docx`;
     const filePath = path.join(generatedDir, fileName);
     fs.writeFileSync(filePath, buf);
 
@@ -79,4 +80,29 @@ export async function generateFromTemplate(order) {
   }
   console.log("results", results);
   return results;
+}
+
+// Funkcija paruošti duomenis
+
+function createOrderdata(data) {
+  console.log("Duomenys prieš paruošimą iš funkcijos", data);
+  const newData = {
+    id: data.id,
+    dateNow: new Date().toLocaleDateString(),
+    clientName: data.client.name,
+    addres: data.client.addres,
+    email: data.client.email,
+    phone: data.client.phone,
+    toolName: data.tool.toolName,
+    toolPrice: data.tool.toolPrice,
+    depozit: data.tool.depozit,
+    dateFrom: new Date(data.date).toLocaleString(),
+    dateUntil: new Date(data.date_until).toLocaleString(), //data.date_until,
+    rentPrice: data.tool.rentPrice,
+    pay_sum: data.pay_sum,
+    days: data.days,
+    payment_method: data.payment_method,
+    pvnNr: data.client.pvnNr,
+  };
+  return newData;
 }

@@ -32,7 +32,7 @@ export async function getClient(req, res) {
 }
 
 export async function createClient(req, res) {
-  let { id, name, addres, phone, email } = req.body;
+  let { id, name, addres, phone, email, pvnNr } = req.body;
   if (!id) id = uuidv4();
 
   const exists = await Client.findOne({ id });
@@ -41,7 +41,7 @@ export async function createClient(req, res) {
       .status(409)
       .json({ success: false, message: "Client already exists" });
 
-  const client = new Client({ id, name, addres, phone, email });
+  const client = new Client({ id, name, addres, phone, email, pvnNr });
   await client.save();
 
   res.status(201).json({ success: true, client });

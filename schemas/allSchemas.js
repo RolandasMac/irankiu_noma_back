@@ -8,6 +8,7 @@ export const clients = {
   addres: { type: String, required: true },
   phone: { type: String, required: true },
   email: { type: String, required: true },
+  pvnNr: { type: String, required: false },
 };
 export const tools = {
   // tool_id: { type: String, required: true },
@@ -39,6 +40,7 @@ export const orders = {
   date_until: { type: Date, required: true },
   returned: { type: Boolean, required: false },
   depozit: { type: Number, required: false },
+  payment_method: { type: String, required: true },
 };
 export const discounts = {
   tools_id: { type: [String], required: true },

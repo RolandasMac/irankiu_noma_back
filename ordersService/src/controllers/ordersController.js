@@ -33,6 +33,7 @@ export async function getOrder(req, res) {
 }
 
 export async function createOrder(req, res) {
+  console.log("Order1", req.body);
   const {
     client_id,
     tool_id,
@@ -42,6 +43,7 @@ export async function createOrder(req, res) {
     discount,
     pay_sum,
     depozit,
+    payment_method,
   } = req.body;
 
   console.log(
@@ -53,7 +55,8 @@ export async function createOrder(req, res) {
     days,
     discount,
     pay_sum,
-    depozit
+    depozit,
+    payment_method
   );
   const order = new Order({
     client_id,
@@ -64,6 +67,7 @@ export async function createOrder(req, res) {
     discount,
     pay_sum,
     depozit,
+    payment_method,
   });
   const createdOrder = await order.save();
 
@@ -90,6 +94,10 @@ export async function createOrder(req, res) {
     days,
     discount,
     payment,
+    date,
+    date_until,
+    pay_sum,
+    payment_method,
   };
   console.log("orderFullData", orderFullData);
 

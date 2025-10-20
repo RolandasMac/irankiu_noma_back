@@ -15,20 +15,23 @@ const orderSchema = Joi.object({
   client_id: Joi.string().required(),
   tool_id: Joi.string().required(),
   date: Joi.date().required(),
-  // time: Joi.date().required(),
-  discount: Joi.number().required(),
-  docs_urls: Joi.array()
-    .items(Joi.object().pattern(Joi.string(), Joi.string()))
-    .required(),
-  pay_sum: Joi.number().required(),
-  paid: Joi.boolean().required(),
   date_until: Joi.date().required(),
-  returned: Joi.boolean().required(),
+  days: Joi.number().required(),
+  discount: Joi.number().required(),
+  pay_sum: Joi.number().required(),
+  depozit: Joi.number().required(),
+  payment_method: Joi.string().required(),
+
+  // docs_urls: Joi.array()
+  //   .items(Joi.object().pattern(Joi.string(), Joi.string()))
+  //   .required(),
+  // paid: Joi.boolean().required(),
+  // returned: Joi.boolean().required(),
 });
 
 router.get("/", listOrders);
 router.get("/:id", getOrder);
-router.post("/", createOrder);
+router.post("/", validateBody(orderSchema), createOrder);
 router.put("/:id", validateBody(orderSchema), updateOrder);
 router.delete("/:id", deleteOrder);
 
