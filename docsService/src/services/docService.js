@@ -103,6 +103,8 @@ function createOrderdata(data) {
     days: data.days,
     payment_method: data.payment_method,
     pvnNr: data.client.pvnNr,
+    pay_sum_words: data.pay_sum_words,
+    clientId: data.client.id,
   };
   return newData;
 }

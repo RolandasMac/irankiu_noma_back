@@ -161,7 +161,7 @@ export const createUser = async (req, res) => {
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    console.log("login data", email, password);
+    console.log("login data!!!", email);
     // Surandi user DB pagal email
     const user = await User.findOne({ email });
     if (!user) {

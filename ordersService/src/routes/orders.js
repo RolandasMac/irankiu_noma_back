@@ -16,12 +16,14 @@ const orderSchema = Joi.object({
   tool_id: Joi.string().required(),
   date: Joi.date().required(),
   date_until: Joi.date().required(),
-  days: Joi.number().required(),
+  // days: Joi.number().required(),
   discount: Joi.number().required(),
   pay_sum: Joi.number().required(),
   depozit: Joi.number().required(),
   payment_method: Joi.string().required(),
-
+  paid: Joi.boolean().required(),
+  returned: Joi.boolean().required(),
+  pay_sum_words: Joi.string(),
   // docs_urls: Joi.array()
   //   .items(Joi.object().pattern(Joi.string(), Joi.string()))
   //   .required(),

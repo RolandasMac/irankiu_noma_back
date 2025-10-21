@@ -44,6 +44,7 @@ export async function createOrder(req, res) {
     pay_sum,
     depozit,
     payment_method,
+    pay_sum_words,
   } = req.body;
 
   console.log(
@@ -56,7 +57,8 @@ export async function createOrder(req, res) {
     discount,
     pay_sum,
     depozit,
-    payment_method
+    payment_method,
+    pay_sum_words
   );
   const order = new Order({
     client_id,
@@ -98,6 +100,7 @@ export async function createOrder(req, res) {
     date_until,
     pay_sum,
     payment_method,
+    pay_sum_words,
   };
   console.log("orderFullData", orderFullData);
 
@@ -116,7 +119,7 @@ export async function createOrder(req, res) {
 export async function updateOrder(req, res) {
   const { id } = req.params;
   const updates = req.body;
-
+  console.log("Updates", id, updates);
   const order = await Order.findByIdAndUpdate(id, updates, {
     new: true,
     runValidators: true,
