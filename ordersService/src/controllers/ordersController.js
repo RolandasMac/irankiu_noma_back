@@ -120,12 +120,56 @@ export async function updateOrder(req, res) {
   const { id } = req.params;
   const updates = req.body;
   console.log("Updates", id, updates);
+
   const order = await Order.findByIdAndUpdate(id, updates, {
     new: true,
     runValidators: true,
   });
+  console.log("order", order);
   if (!order)
     return res.status(404).json({ success: false, message: "Order not found" });
+
+  // *******************************************************
+  // gauname kliento duomenis iš client servico
+  console.log("Prieš klientą", updates.client_id);
+  const client = await getClientById(updates.client_id);
+  console.log("client", client);
+  // gauname tools duomenis iš tools serviso
+  console.log("Prieš tools", updates.tool_id);
+  const tool = await getToolById(updates.tool_id);
+  console.log("tool", tool);
+  // gauname discounts duomenis iš discounts serviso
+  console.log("Prieš discounts", updates.tool_id);
+  const discounts = await getDiscount(updates.tool_id, updates.days);
+  console.log("discounts", discounts);
+  // Paskaičiuojame kainą
+  const payment = updates.days * tool.rentPrice * (1 - updates.discount / 100);
+  console.log("payment", payment);
+
+  const orderFullData = {
+    id: order._id,
+    client,
+    tool,
+    days: updates.days,
+    discount: updates.discount,
+    payment,
+    date: updates.date,
+    date_until: updates.date_until,
+    pay_sum: payment,
+    payment_method: updates.payment_method,
+    pay_sum_words: updates.pay_sum_words,
+  };
+  console.log("orderFullData", orderFullData);
+
+  // Duodama komanda generuoti dokumentus
+  console.log("Duodama komanda generuoti dokumentus");
+  const docs = await generateDocs(orderFullData);
+  console.log("docs", docs);
+  // const updatedOrder = await Order.findByIdAndUpdate(order._id, {
+  //   docs_urls: docs,
+  // });
+
+  // *******************************************************
 
   res.json({ success: true, order });
 }
