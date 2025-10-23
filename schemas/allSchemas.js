@@ -87,3 +87,25 @@ export const user = {
     default: new Date(),
   },
 };
+export const number = {
+  type: {
+    type: String,
+    required: true,
+    enum: ["invoice", "contract", "receipt"], // kad būtų aišku, kas leidžiama
+  },
+  year: {
+    type: Number,
+    required: true,
+    default: new Date().getFullYear(),
+  },
+  lastNumber: {
+    type: Number,
+    required: true,
+    default: 0,
+  },
+  updatedAt: {
+    type: Date,
+    required: true,
+    default: Date.now,
+  },
+};
