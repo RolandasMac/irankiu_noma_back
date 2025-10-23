@@ -1,0 +1,34 @@
+import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
+import { connectDB } from "./utils/db.js";
+import { createApp } from "./app.js";
+import { connectRabbit } from "./rabbit/connection.js";
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+import { startDocConsumer } from "./rabbit/documentConsumer.js";
+
+dotenv.config({ path: path.resolve(__dirname, "../../../.env") });
+
+const PORT = process.env.ORDER_PORT || 4004;
+const MONGODB_URI = process.env.MONGO_URI;
+
+async function start() {
+  try {
+    await connectDB(MONGODB_URI);
+    const app = createApp();
+    app.listen(PORT, async () => {
+      console.log(`✅ Orders service running at http://localhost:${PORT}`);
+      try {
+        await connectRabbit();
+        // startDocConsumer();
+      } catch (err) {
+        console.error("RabbitMQ not connected:", err);
+      }
+    });
+  } catch (err) {
+    console.error("❌ Failed to start server:", err);
+    process.exit(1);
+  }
+}
+
+start();
