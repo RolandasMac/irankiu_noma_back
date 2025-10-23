@@ -1,10 +1,14 @@
 import Order from "../models/Order.js";
-import { sendOrderEvent } from "../events/sendOrderEvent.js";
-import { publishOrderCreated } from "../rabbit/publisher.js";
+import Counter from "../models/Counter.js";
+// import { sendOrderEvent } from "../events/sendOrderEvent.js";
+// import { publishOrderCreated } from "../rabbit/publisher.js";
 import { getClientById } from "../rabbit/getClientById.js";
 import { getToolById } from "../rabbit/getToolById.js";
 import { getDiscount } from "../rabbit/getDiscountByToolId.js";
 import { generateDocs } from "../rabbit/generateDocs.js";
+
+// test docNumGenerator
+import { getNextNumber } from "../utils/numberGenerator.js";
 export async function listOrders(req, res) {
   const page = Math.max(1, Number(req.query.page) || 1);
   const limit = Math.min(100, Number(req.query.limit) || 20);
@@ -181,4 +185,28 @@ export async function deleteOrder(req, res) {
     return res.status(404).json({ success: false, message: "Order not found" });
 
   res.json({ success: true, message: "Order deleted" });
+}
+export async function test(req, res) {
+  const { type, num } = req.body;
+  let number = 25;
+
+  // Įdeda numerį į eilę sekančiam suteikimui
+  if (num) {
+    const year = new Date().getFullYear();
+    await Counter.updateOne(
+      { id: `${type}_${year}` },
+      { $push: { availableNumbers: { $each: [num], $sort: 1 } } }
+    );
+  }
+
+  // Duoda sekantį prieinamą numerį
+  number = await getNextNumber(type);
+
+  console.log("number", number);
+
+  res.json({
+    success: true,
+    message: "OrdersService test endpoint work well!",
+    number,
+  });
 }

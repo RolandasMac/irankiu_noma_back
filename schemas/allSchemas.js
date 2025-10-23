@@ -88,6 +88,10 @@ export const user = {
   },
 };
 export const number = {
+  id: {
+    type: String,
+    required: true,
+  },
   type: {
     type: String,
     required: true,
@@ -103,6 +107,7 @@ export const number = {
     required: true,
     default: 0,
   },
+  availableNumbers: { type: [Number], default: [] },
   updatedAt: {
     type: Date,
     required: true,

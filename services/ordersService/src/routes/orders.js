@@ -7,6 +7,7 @@ import {
   createOrder,
   updateOrder,
   deleteOrder,
+  test
 } from "../controllers/ordersController.js";
 
 const router = express.Router();
@@ -36,5 +37,6 @@ router.get("/:id", getOrder);
 router.post("/", validateBody(orderSchema), createOrder);
 router.put("/:id", validateBody(orderSchema), updateOrder);
 router.delete("/:id", deleteOrder);
+router.post("/test", test)
 
 export default router;
