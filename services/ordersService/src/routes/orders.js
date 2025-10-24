@@ -14,6 +14,7 @@ const router = express.Router();
 
 const orderSchema = Joi.object({
   client_id: Joi.string().required(),
+  clientName: Joi.string().required(),
   tool_id: Joi.string().required(),
   toolName: Joi.string().required(),
   date: Joi.date().required(),
@@ -24,8 +25,9 @@ const orderSchema = Joi.object({
   payment_method: Joi.string().required(),
   paid: Joi.boolean().required(),
   returned: Joi.boolean().required(),
-  pay_sum_words: Joi.string(),
+  // pay_sum_words: Joi.string(),
   days: Joi.number().required(),
+  lang: Joi.string().required(),
   // docs_urls: Joi.array()
   //   .items(Joi.object().pattern(Joi.string(), Joi.string()))
   //   .required(),

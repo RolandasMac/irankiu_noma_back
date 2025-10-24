@@ -40,6 +40,7 @@ export async function createOrder(req, res) {
   console.log("Order1", req.body);
   const {
     client_id,
+    clientName,
     tool_id,
     toolName,
     date,
@@ -49,12 +50,14 @@ export async function createOrder(req, res) {
     pay_sum,
     depozit,
     payment_method,
-    pay_sum_words,
+    // pay_sum_words,
+    lang,
   } = req.body;
 
   console.log(
     "req.body",
     client_id,
+    clientName,
     tool_id,
     toolName,
     date,
@@ -64,10 +67,12 @@ export async function createOrder(req, res) {
     pay_sum,
     depozit,
     payment_method,
-    pay_sum_words
+    // pay_sum_words,
+    lang
   );
   const order = new Order({
     client_id,
+    clientName,
     tool_id,
     toolName,
     date,
@@ -97,8 +102,8 @@ export async function createOrder(req, res) {
     (tool.rentPrice * (1 - discount / 100)).toFixed(2)
   ).toFixed(2);
 
-  const payment = days * tool.rentPrice;
-  console.log("payment", payment);
+  // const payment = days * tool.rentPrice;
+  // console.log("payment", payment);
 
   const orderFullData = {
     id: createdOrder._id,
@@ -111,7 +116,8 @@ export async function createOrder(req, res) {
     date_until,
     pay_sum,
     payment_method,
-    pay_sum_words,
+    // pay_sum_words,
+    lang,
   };
 
   // ------------------------------------------
@@ -152,7 +158,7 @@ export async function updateOrder(req, res) {
     new: true,
     runValidators: true,
   });
-  console.log("order'is", order);
+  // console.log("order'is", order);
   if (!order)
     return res.status(404).json({ success: false, message: "Order not found" });
 
@@ -188,10 +194,10 @@ export async function updateOrder(req, res) {
     date_until: updates.date_until,
     pay_sum: payment,
     payment_method: updates.payment_method,
-    pay_sum_words: updates.pay_sum_words,
+    // pay_sum_words: updates.pay_sum_words,
     docNr: order.docNr,
   };
-  console.log("orderFullData", orderFullData);
+  // console.log("orderFullData", orderFullData);
 
   // Duodama komanda generuoti dokumentus
   console.log("Duodama komanda generuoti dokumentus");

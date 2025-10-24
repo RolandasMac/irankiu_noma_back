@@ -24,6 +24,7 @@ export const tools = {
 };
 export const orders = {
   client_id: { type: String, required: true },
+  clientName: { type: String, required: true },
   tool_id: { type: String, required: true },
   toolName: { type: String, required: true },
   date: { type: Date, required: true },

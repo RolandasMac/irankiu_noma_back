@@ -148,6 +148,8 @@ function formatNumber(type, year, shortYear, num) {
       return `${prefix}-${shortYear}-${padded}`;
     case "PREFIX-NUMBER":
       return `${prefix}-${padded}`;
+    case "NUMBER":
+      return `${padded}`;
     case "PREFIX-YEAR-NUMBER":
     default:
       return `${prefix}-${year}-${padded}`;

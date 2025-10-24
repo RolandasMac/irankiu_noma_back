@@ -35,6 +35,8 @@ import PizZip from "pizzip";
 import Docxtemplater from "docxtemplater";
 import libre from "libreoffice-convert";
 import paths from "../../../../config/paths.js";
+import { numberToWords, locales } from "./../utils/numberToWords.js";
+
 const { templatesDir, generatedDir } = paths;
 
 // Nurodom statiškai
@@ -87,6 +89,9 @@ export async function generateFromTemplate(order) {
 
 function createOrderdata(data) {
   console.log("Duomenys prieš paruošimą iš funkcijos", data);
+  const locale = locales[data.lang];
+  const totallSum = data.pay_sum + data.tool.depozit;
+  const pay_sum_words = numberToWords(totallSum, locale);
   const newData = {
     id: data.id,
     dateNow: new Date().toLocaleDateString(),
@@ -104,9 +109,9 @@ function createOrderdata(data) {
     days: data.days,
     payment_method: data.payment_method,
     pvnNr: data.client.pvnNr ? data.client.pvnNr : "",
-    pay_sum_words: data.pay_sum_words,
+    pay_sum_words: pay_sum_words,
     clientId: data.client.id,
-    total_sum: data.pay_sum + data.tool.depozit,
+    total_sum: totallSum,
     contractNr: data.docNr.contractNr,
     invoiceNr: data.docNr.invoiceNr,
     receiptNr: data.docNr.receiptNr,
