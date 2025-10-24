@@ -164,7 +164,7 @@ function getPrefix(type, DEFAULT_PREFIX) {
     case "contract":
       return "CON";
     case "receipt":
-      return "RCPT";
+      return "RR";
     default:
       return DEFAULT_PREFIX;
   }

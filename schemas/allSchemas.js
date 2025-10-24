@@ -25,6 +25,7 @@ export const tools = {
 export const orders = {
   client_id: { type: String, required: true },
   tool_id: { type: String, required: true },
+  toolName: { type: String, required: true },
   date: { type: Date, required: true },
   // time: { type: Date, required: true },
   discount: { type: Number, required: true, default: 0 },
@@ -41,6 +42,11 @@ export const orders = {
   returned: { type: Boolean, required: false },
   depozit: { type: Number, required: false },
   payment_method: { type: String, required: true },
+  docNr: {
+    contractNr: { type: String, required: false },
+    invoiceNr: { type: String, required: false },
+    receiptNr: { type: String, required: false },
+  },
 };
 export const discounts = {
   tools_id: { type: [String], required: true },

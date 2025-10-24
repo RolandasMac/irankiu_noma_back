@@ -107,6 +107,9 @@ function createOrderdata(data) {
     pay_sum_words: data.pay_sum_words,
     clientId: data.client.id,
     total_sum: data.pay_sum + data.tool.depozit,
+    contractNr: data.docNr.contractNr,
+    invoiceNr: data.docNr.invoiceNr,
+    receiptNr: data.docNr.receiptNr,
   };
   return newData;
 }

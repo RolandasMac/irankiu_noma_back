@@ -7,7 +7,7 @@ import {
   createOrder,
   updateOrder,
   deleteOrder,
-  test
+  test,
 } from "../controllers/ordersController.js";
 
 const router = express.Router();
@@ -15,6 +15,7 @@ const router = express.Router();
 const orderSchema = Joi.object({
   client_id: Joi.string().required(),
   tool_id: Joi.string().required(),
+  toolName: Joi.string().required(),
   date: Joi.date().required(),
   date_until: Joi.date().required(),
   discount: Joi.number().required(),
@@ -37,6 +38,6 @@ router.get("/:id", getOrder);
 router.post("/", validateBody(orderSchema), createOrder);
 router.put("/:id", validateBody(orderSchema), updateOrder);
 router.delete("/:id", deleteOrder);
-router.post("/test", test)
+router.post("/test", test);
 
 export default router;

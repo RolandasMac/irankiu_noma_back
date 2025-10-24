@@ -41,6 +41,7 @@ export async function createOrder(req, res) {
   const {
     client_id,
     tool_id,
+    toolName,
     date,
     date_until,
     days,
@@ -55,6 +56,7 @@ export async function createOrder(req, res) {
     "req.body",
     client_id,
     tool_id,
+    toolName,
     date,
     date_until,
     days,
@@ -67,6 +69,7 @@ export async function createOrder(req, res) {
   const order = new Order({
     client_id,
     tool_id,
+    toolName,
     date,
     date_until,
     days,
@@ -90,7 +93,11 @@ export async function createOrder(req, res) {
   const discounts = await getDiscount(tool_id, days);
   console.log("discounts", discounts);
   // Paskaičiuojame kainą
-  const payment = days * tool.price * (1 - discount / 100);
+  tool.rentPrice = parseFloat(
+    (tool.rentPrice * (1 - discount / 100)).toFixed(2)
+  ).toFixed(2);
+
+  const payment = days * tool.rentPrice;
   console.log("payment", payment);
 
   const orderFullData = {
@@ -99,25 +106,41 @@ export async function createOrder(req, res) {
     tool,
     days,
     discount,
-    payment,
+    // payment,
     date,
     date_until,
     pay_sum,
     payment_method,
     pay_sum_words,
   };
+
+  // ------------------------------------------
+  // Generuoja doc numerius
+  // ------------------------------------------
+  const docNr = {
+    contractNr: await getNextNumber("contract"),
+    invoiceNr: await getNextNumber("invoice"),
+    receiptNr: await getNextNumber("receipt"),
+  };
+  console.log("docNr", docNr);
+  // ------------------------------------------
+  orderFullData.docNr = docNr;
   console.log("orderFullData", orderFullData);
 
   // Duodama komanda generuoti dokumentus
   console.log("Duodama komanda generuoti dokumentus");
   const docs = await generateDocs(orderFullData);
   console.log("docs", docs);
+
   const updatedOrder = await Order.findByIdAndUpdate(createdOrder._id, {
     docs_urls: docs,
+    docNr,
   });
   // await sendOrderEvent(order); // <--- čia išsiunčiam eventą
   // await publishOrderCreated(order);
-  res.status(201).json({ success: true, message: "Order created", order });
+  res
+    .status(201)
+    .json({ success: true, message: "Order created", updatedOrder });
 }
 
 export async function updateOrder(req, res) {
@@ -129,7 +152,7 @@ export async function updateOrder(req, res) {
     new: true,
     runValidators: true,
   });
-  console.log("order", order);
+  console.log("order'is", order);
   if (!order)
     return res.status(404).json({ success: false, message: "Order not found" });
 
@@ -147,7 +170,11 @@ export async function updateOrder(req, res) {
   const discounts = await getDiscount(updates.tool_id, updates.days);
   console.log("discounts", discounts);
   // Paskaičiuojame kainą
-  const payment = updates.days * tool.rentPrice * (1 - updates.discount / 100);
+
+  tool.rentPrice = parseFloat(
+    (tool.rentPrice * (1 - updates.discount / 100)).toFixed(2)
+  ).toFixed(2);
+  const payment = updates.days * tool.rentPrice;
   console.log("payment", payment);
 
   const orderFullData = {
@@ -156,12 +183,13 @@ export async function updateOrder(req, res) {
     tool,
     days: updates.days,
     discount: updates.discount,
-    payment,
+    // payment,
     date: updates.date,
     date_until: updates.date_until,
     pay_sum: payment,
     payment_method: updates.payment_method,
     pay_sum_words: updates.pay_sum_words,
+    docNr: order.docNr,
   };
   console.log("orderFullData", orderFullData);
 
@@ -184,7 +212,19 @@ export async function deleteOrder(req, res) {
   if (!order)
     return res.status(404).json({ success: false, message: "Order not found" });
 
-  res.json({ success: true, message: "Order deleted" });
+  // ------------------------------------------------------
+  //  Ištrinto dokumento numerį įdedame atgal naudojimui
+  // ------------------------------------------------------
+  const { contractNr, invoiceNr, receiptNr } = order.docNr;
+  let message = "";
+  if ((contractNr, invoiceNr, receiptNr)) {
+    await returnNumberToCounter("receipt", receiptNr);
+    message = "Order deleted and numbers returned to counters";
+  } else {
+    message = "Order deleted";
+  }
+
+  res.json({ success: true, message });
 }
 export async function test(req, res) {
   const { type, num } = req.body;
@@ -209,4 +249,33 @@ export async function test(req, res) {
     message: "OrdersService test endpoint work well!",
     number,
   });
+}
+
+/**
+ * Ištrina numerį iš DB ir grąžina jo skaičių į Counter.availableNumbers
+ * Pvz. "CON-2025-004" -> 4
+ * @param {string} type - dokumento tipas ("contract", "invoice", "receipt" ir t.t.)
+ * @param {string} docNumber - pilnas numeris, pvz. "CON-2025-004"
+ */
+export async function returnNumberToCounter(type, docNumber) {
+  if (!docNumber || typeof docNumber !== "string") return;
+
+  // 1️⃣ Ištraukiame skaičiaus dalį iš pabaigos
+  // Paieško bet kokių 1 ar daugiau skaitmenų gale
+  const match = docNumber.match(/(\d+)$/);
+  if (!match) return;
+
+  // 2️⃣ Paverčiam į skaičių (pašalinam nulius priekyje)
+  const num = parseInt(match[1], 10);
+  if (isNaN(num)) return;
+
+  // 3️⃣ Grąžinam jį į Counter.availableNumbers
+  const year = new Date().getFullYear();
+
+  await Counter.updateOne(
+    { id: `${type}_${year}` },
+    { $push: { availableNumbers: { $each: [num], $sort: 1 } } }
+  );
+
+  console.log(`✅ Numeris ${num} (${docNumber}) grąžintas į ${type}_${year}`);
 }
