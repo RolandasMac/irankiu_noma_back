@@ -9,6 +9,7 @@ import {
   deleteDiscount,
   getDiscountsByToolId,
 } from "../controllers/discountsController.js";
+import { checkRole } from "../middleware/checkRole.js";
 const router = express.Router();
 
 const discountSchema = Joi.object({
@@ -22,9 +23,19 @@ const discountSchema = Joi.object({
 
 router.get("/", listDiscounts);
 router.get("/:id", getDiscount);
-router.post("/", validateBody(discountSchema), createDiscount);
-router.put("/:id", validateBody(discountSchema), updateDiscount);
-router.delete("/:id", deleteDiscount);
+router.post(
+  "/",
+  checkRole(["admin"]),
+  validateBody(discountSchema),
+  createDiscount
+);
+router.put(
+  "/:id",
+  checkRole(["gaidys"]),
+  validateBody(discountSchema),
+  updateDiscount
+);
+router.delete("/:id", checkRole(["admin"]), deleteDiscount);
 router.get("/toolId/:toolId", getDiscountsByToolId);
 
 export default router;

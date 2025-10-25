@@ -392,14 +392,15 @@ export const getusers = async (req, res) => {
 };
 export const updateuser = async (req, res) => {
   try {
-    const { id, name, email, roles } = req.body;
+    const id = req.params.id;
+    const { name, email, roles, phoneNr = [] } = req.body;
 
     if (!id || !name || !email || !roles) {
       throw new Error("Neperduoti parametrai: id, name, email arba roles");
     }
     const updateduser = await User.findOneAndUpdate(
       { _id: id },
-      { name, email, roles },
+      { name, email, roles, phoneNr },
       { new: true }
     ).select("-password");
     if (!updateduser) {
@@ -529,5 +530,29 @@ export const refresh = async (req, res) => {
   } catch (err) {
     console.error("refresh error", err);
     return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+export const getUser = async (req, res) => {
+  try {
+    const id = req.params.id;
+    if (!id) {
+      throw new Error("Neperduotas parametras: id");
+    }
+    const user = await User.findOne({ _id: id }).select("-password");
+    if (!user) {
+      throw new Error("Vartotojo duomenų ištrinti nepavyko");
+    }
+    res.status(200).json({
+      message: `Vartotojų duomenys sėkmingai ištrinti`,
+      success: true,
+      user,
+    });
+  } catch (err) {
+    const objError = {
+      service: "authService",
+      file: "controllers/authController",
+      place: "deleteuser",
+      error: err.message,
+    };
   }
 };

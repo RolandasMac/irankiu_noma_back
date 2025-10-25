@@ -12,6 +12,7 @@ import {
   login,
   updateuser,
   refresh,
+  getUser,
 } from "../controllers/authController.js";
 import { checkRole } from "../middleware/checkRole.js";
 
@@ -32,9 +33,10 @@ router.get("/logout", logout);
 router.post("/sendemailcode", sendEmailCode);
 router.post("/createuser", createUser);
 router.post("/login", login);
+router.get("/getUser/:id", checkRole(["admin"]), getUser);
 // router.post("/createsetings", loginMiddleware, authController.createsetings);
 
-router.post("/updateuser", updateuser);
+router.post("/updateuser/:id", checkRole(["admin"]), updateuser);
 
 // router.delete("/deleteuser", loginMiddleware, authController.deleteuser);
 
