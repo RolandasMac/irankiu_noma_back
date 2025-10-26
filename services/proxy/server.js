@@ -1,34 +1,50 @@
-const fs = require("fs");
-const http = require("http");
-const https = require("https");
-// const privateKey = fs.readFileSync("../cert/private.key", "utf8");
-// const certificate = fs.readFileSync("../cert/certificate.crt", "utf8");
-
-// const pathServ = "/etc/letsencrypt/live/kvieciu-22.macrol.lt/";
-// const privateKey = fs.readFileSync(`${pathServ}privkey.pem`);
-// const certificate = fs.readFileSync(`${pathServ}fullchain.pem`);
-// const credentials = { key: privateKey, cert: certificate };
-const rateLimit = require("express-rate-limit");
-const express = require("express");
-const passport = require("passport");
-const { Strategy: JwtStrategy, ExtractJwt } = require("passport-jwt");
-const {
+// =======================================================
+//  IMPORTAI
+// =======================================================
+import fs from "fs";
+import http from "http";
+import https from "https";
+import express from "express";
+import rateLimit from "express-rate-limit";
+import passport from "passport";
+import { Strategy as JwtStrategy, ExtractJwt } from "passport-jwt";
+import {
   createProxyMiddleware,
   responseInterceptor,
   fixRequestBody,
-} = require("http-proxy-middleware");
-const jwt = require("jsonwebtoken");
-const cors = require("cors");
-const cookieParser = require("cookie-parser");
-const dotenv = require("dotenv");
-const path = require("path");
-const { paths } = require("../config/paths.js");
+} from "http-proxy-middleware";
+import jwt from "jsonwebtoken";
+import cors from "cors";
+import cookieParser from "cookie-parser";
+import dotenv from "dotenv";
+import path from "path";
+import axios from "axios";
+import { fileURLToPath } from "url";
+import paths from "../../config/paths.js"; // tavo failas su direktorijomis
+
 const { imageUploadsDir } = paths;
-// viršuje pridėk importus
-const axios = require("axios");
+
+// =======================================================
+//  SSL Sertifikatai
+// =======================================================
+
+// const pathServ = "/etc/letsencrypt/live/nuoma.macrol.lt/";
+// const privateKey = fs.readFileSync(`${pathServ}privkey.pem`);
+// const certificate = fs.readFileSync(`${pathServ}fullchain.pem`);
+// const credentials = { key: privateKey, cert: certificate };
+
+// =======================================================
+//  DIR KONFIGŪRACIJA
+// =======================================================
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// =======================================================
+//  EXPRESS & ENV
+// =======================================================
+dotenv.config({ path: path.resolve(__dirname, "../../.env") });
 
 const app = express();
-dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
 const PORT = process.env.PROXY_PORT;
 const HOST = process.env.HOST;
@@ -40,18 +56,10 @@ const ORDERPORT = process.env.ORDER_PORT;
 const DISCOUNTPORT = process.env.DISCOUNT_PORT;
 const DOCSPORT = process.env.DOCS_PORT;
 
-// const IMAGEPORT = process.env.IMAGE_PORT;
-// const DOCSTOREPORT = process.env.DOCSTORE_PORT;
-// const VOTEPORT = process.env.VOTE_PORT;
-// const MEMBERPORT = process.env.MEMBER_PORT;
-// const CHATAIPORT = process.env.CHAT_AI_PORT;
-// const PROPOSALPORT = process.env.PROPOSAL_PORT;
-// ===============================================
-// 1. Bendrieji Middleware
-// ===============================================
-// app.use(express.json()); // Leidžia apdoroti JSON užklausų kūnus
-// app.use(express.urlencoded({ extended: true })); // Leidžia apdoroti URL-encoded užklausų kūnus
-app.use(cookieParser()); // Įjungiame cookie-parser middleware, kad galėtume pasiekti slapukus req.cookies
+// =======================================================
+//  MIDDLEWARES
+// =======================================================
+app.use(cookieParser());
 app.use(
   cors({
     origin: (origin, callback) => {
@@ -69,98 +77,60 @@ app.use(
   })
 );
 
-// ===============================================
-// 2. Passport.js JWT Strategijos Konfiguracija
-// ===============================================
-const jwtSecret = process.env.JWT_KEY; // Jūsų JWT paslaptis iš .env failo
-const JWT_COOKIE_NAME = "authtoken"; // Slapuko, kuriame saugomas JWT, pavadinimas
+// =======================================================
+//  PASSPORT JWT STRATEGIJA
+// =======================================================
+const jwtSecret = process.env.JWT_KEY;
+const JWT_COOKIE_NAME = "authtoken";
 
-// Funkcija, skirta išgauti JWT iš užklausos slapukų
-const cookieExtractor = function (req) {
-  let token = null;
+const cookieExtractor = (req) => {
   if (req && req.cookies) {
-    // console.log("Veikia cookies", req);
-    token = req.cookies[JWT_COOKIE_NAME];
-    // console.log("token", token);
+    return req.cookies[JWT_COOKIE_NAME];
   }
-  // console.log("adresas", req.url);
-  // console.log("Bandome išgauti tokeną iš slapukų:", token ? "Rastas" : "Nėra");
-  return token;
+  return null;
 };
 
 const jwtOptions = {
-  jwtFromRequest: ExtractJwt.fromExtractors([cookieExtractor]), // NAUJAS: Ištraukiame JWT iš slapuko
-  secretOrKey: jwtSecret, // Paslaptis, naudojama tokeno patvirtinimui
+  jwtFromRequest: ExtractJwt.fromExtractors([cookieExtractor]),
+  secretOrKey: jwtSecret,
 };
 
 passport.use(
   "jwt-cookie",
   new JwtStrategy(jwtOptions, (jwtPayload, done) => {
-    // Ši funkcija iškviečiama, kai tokenas yra sėkmingai iššifruojamas.
-    // console.log("JWT Payload gautas iš slapuko:", jwtPayload);
-
     const user = {
       id: jwtPayload.id,
       email: jwtPayload.email,
       roles: jwtPayload.roles || [],
       name: jwtPayload.name,
     };
-
-    if (user.id) {
-      return done(null, user);
-    } else {
-      return done(null, false);
-    }
+    return user.id ? done(null, user) : done(null, false);
   })
 );
 
-// Inicijuojame Passport.js (nereikia sesijų REST API)
 app.use(passport.initialize());
 
-// ===============================================
-// 3. Custom Middleware: Vartotojo duomenų perdavimas į kitus servisus ir kiti middleware
-// ===============================================
-
-// Sukuriame rate limiter'į
-const limiter = rateLimit({
-  windowMs: 1 * 60 * 1000,
-  max: 50,
-  message: "Per daug užklausų iš vieno IP, pabandykite vėliau.",
-});
-
-// Naudojame rate limiter'į tik proxy užklausoms
-// app.use("/", limiter);
-
-// Šitas middleware perduoda user per header į servisus
+// =======================================================
+//  AUTENTIFIKAVIMO MIDDLEWARE
+// =======================================================
 const injectAuthUserToHeaders = (req, res, next) => {
   if (req.user) {
-    // console.log("Vartotojas yra autentifikuotas", req.user);
     req.headers["X-User-Id"] = req.user.id;
     req.headers["X-User-Email"] = req.user.email;
     req.headers["X-User-Name"] = req.user.name;
-    req.headers["X-User-Roles"] = JSON.stringify(req.user.roles); // Roles perduodamos kaip JSON stringas
-    // console.log(
-    //   `Prie užklausos pridedami headeriai: X-User-Id=${req.user.id},
-    //    X-User-Email=${req.user.email},
-    //    X-User-Roles=${req.user.roles},
-    //    X-User-Name=${req.user.name}
-    //   `
-    // );
+    req.headers["X-User-Roles"] = JSON.stringify(req.user.roles);
   } else {
-    // Jei vartotojas nėra autentifikuotas (pvz., viešos užklausos),
-    // užtikriname, kad šios antraštės nebūtų siunčiamos.
     delete req.headers["X-User-Id"];
     delete req.headers["X-User-Email"];
     delete req.headers["X-User-Roles"];
     delete req.headers["X-User-Name"];
-    // console.log(
-    //   "Vartotojas neautentifikuotas, vartotojo antraštės nepridedamos."
-    // );
   }
   next();
 };
 
-// ========== TOKEN REFRESH MIDDLEWARE ==========
+// =======================================================
+//  TOKEN REFRESH LOGIKA
+// =======================================================
 let ongoingRefreshPromise = null;
 
 function shouldRefresh(token, thresholdSeconds = 30) {
@@ -184,17 +154,28 @@ async function callRefresh(refreshToken) {
   return resp.data;
 }
 
+function setCookiesFromRefresh(req, res, data) {
+  const oneHour = 60 * 60;
+  const month = 30 * 24 * oneHour;
+
+  req.cookies["authtoken"] = data.accessToken;
+  req.cookies["refreshToken"] = data.refreshToken;
+
+  res.setHeader("Set-Cookie", [
+    `authtoken=${data.accessToken}; HttpOnly; Secure; SameSite=None; Path=/; Max-Age=${oneHour}`,
+    `refreshToken=${data.refreshToken}; HttpOnly; Secure; SameSite=None; Path=/; Max-Age=${month}`,
+  ]);
+}
+
 async function ensureTokensMiddleware(req, res, next) {
   const accessToken = req.cookies["authtoken"];
   const refreshToken = req.cookies["refreshToken"];
-  // console.log("Cookie tkrinimas", accessToken, refreshToken);
-  if (!shouldRefresh(accessToken)) return next();
 
-  if (!refreshToken) {
+  if (!shouldRefresh(accessToken)) return next();
+  if (!refreshToken)
     return res
       .status(401)
       .json({ success: false, message: "Neautentifikuotas vartotojas" });
-  }
 
   if (ongoingRefreshPromise) {
     try {
@@ -224,62 +205,27 @@ async function ensureTokensMiddleware(req, res, next) {
   } catch (err) {
     return res.status(401).json({
       success: false,
-      message: `Authentication required", ${err.message}`,
+      message: `Authentication required: ${err.message}`,
     });
   }
 }
 
-function setCookiesFromRefresh(req, res, data) {
-  const oneHour = 60 * 60; // sekundėmis
-  const month = 30 * 24 * oneHour;
-  // console.log("setCookiesFromRefresh", data);
-  // res.cookie("authtoken", data.accessToken, {
-  //   httpOnly: true,
-  //   secure: true,
-  //   sameSite: "none",
-  //   maxAge: oneHour,
-  //   path: "/",
-  // });
-  // res.cookie("refreshToken", data.refreshToken, {
-  //   httpOnly: true,
-  //   secure: true,
-  //   sameSite: "none",
-  //   maxAge: 30 * 24 * oneHour,
-  //   path: "/",
-  // });
-
-  // 🔹 atnaujinam request cookies (kad šitas req toliau naudotų naują tokeną)
-  req.cookies["authtoken"] = data.accessToken;
-  req.cookies["refreshToken"] = data.refreshToken;
-
-  // 🔹 atnaujinam Authorization headerį, jei kur nors naudojamas
-  // req.headers["authorization"] = `Bearer ${data.accessToken}`;
-
-  // res.setHeader("Set-Cookie", [
-  //   `authtoken=${data.accessToken}; HttpOnly; Secure; SameSite=None; Path=/; Max-Age=${oneHour}; Domain=kvieciu-22.macrol.lt`,
-  //   `refreshToken=${data.refreshToken}; HttpOnly; Secure; SameSite=None; Path=/; Max-Age=${month}; Domain=kvieciu-22.macrol.lt`,
-  // ]);
-  res.setHeader("Set-Cookie", [
-    `authtoken=${data.accessToken}; HttpOnly; Secure; SameSite=None; Path=/; Max-Age=${oneHour}`,
-    `refreshToken=${data.refreshToken}; HttpOnly; Secure; SameSite=None; Path=/; Max-Age=${month}`,
-  ]);
-}
-
-const setupProxy = (port, routePrefix, requiresAuth = false) => {
+// =======================================================
+//  PROXY KONFIGŪRACIJA
+// =======================================================
+function setupProxy(port, routePrefix, requiresAuth = false) {
   const middlewares = [];
-  // console.log("proxy middlewares pradzia");
+
   if (requiresAuth) {
     middlewares.push(ensureTokensMiddleware);
-
     middlewares.push((req, res, next) => {
       passport.authenticate("jwt-cookie", { session: false }, (err, user) => {
         if (err) return next(err);
-        if (!user) {
+        if (!user)
           return res.status(401).json({
             success: false,
             message: "Tokenas negaliojantis arba vartotojas neautorizuotas",
           });
-        }
         req.user = user;
         next();
       })(req, res, next);
@@ -287,153 +233,46 @@ const setupProxy = (port, routePrefix, requiresAuth = false) => {
   }
 
   middlewares.push(injectAuthUserToHeaders);
-  // middlewares.push((req, res, next) => {
-  //   console.log("proxy middlewares pabaiga");
-  //   next();
-  // });
   middlewares.push(
     createProxyMiddleware({
       target: `http://${BACKHOST}:${port}`,
       changeOrigin: true,
-      cookieDomainRewrite: false, // pašalina backend domeną, leisim patys nurodyti
-      // selfHandleResponse: false, // proxy pats tvarko response
-      // onProxyRes: (proxyRes, req, res) => {
-      //   console.log("dfgdfgdfgdfg");
-      //   // proxyRes.headers["x-added"] = "foobar"; // add new header to response
-      //   // delete proxyRes.headers["x-removed"]; // remove header from response
-      // },
-      // onProxyReq: (proxyReq, req, res) => {
-      //   // add custom header to request
-      //   console.log("Bybis kamine");
-      //   // or log the req
-      // },
-      // onProxyRes: (proxyRes, req, res) => {
-      //   const cookies = proxyRes.headers["set-cookie"];
-      //   console.log("Gaidys");
-      //   console.log(">>> proxyRes.headers['set-cookie'] =", cookies);
-      //   if (cookies && cookies.length) {
-      //     const fixedCookies = cookies.map((cookie) => {
-      //       cookie = cookie.replace(/Domain=[^;]+/i, ""); // išmetam domeną, jei ne tavo
-      //       if (!/; *Secure/i.test(cookie)) cookie += "; Secure";
-      //       if (!/; *HttpOnly/i.test(cookie)) cookie += "; HttpOnly";
-      //       if (!/; *SameSite=None/i.test(cookie)) cookie += "; SameSite=None";
-      //       // cookie += "; Domain=kvieciu-22.macrol.lt"; // jei reikia priverstinai nustatyti domeną
-      //       return cookie;
-      //     });
-      //     res.setHeader("Set-Cookie", fixedCookies);
-      //   }
-      // },
-      // ************Keičia atsakymą į frontend************
-
-      // selfHandleResponse: true, // res.end() will be called internally by responseInterceptor()
-
-      // /**
-      //  * Intercept response and replace 'Hello' with 'Goodbye'
-      //  **/
-      // on: {
-      //   proxyRes: responseInterceptor(
-      //     async (responseBuffer, proxyRes, req, res) => {
-      //       try {
-      //         // konvertuojam į string
-      //         const responseString = responseBuffer.toString("utf8");
-
-      //         // pabandom parse kaip JSON
-      //         // let data = JSON.parse(responseString);
-
-      //         // // prie atsakymo pridėk user info iš req.user (ar kitur)
-      //         // data.logedUser = req.user || {
-      //         //   id: "123",
-      //         //   roles: [],
-      //         //   name: "Gaidys",
-      //         // };
-      //         console.log("Gaidyyyyyyyysss!");
-      //         // grąžinam atgal kaip JSON string
-      //         // return JSON.stringify(data);
-      //       } catch (err) {
-      //         console.error("Proxy response parse error:", err.message);
-      //         // jeigu atsakymas ne JSON, grąžinam originalų tekstą
-      //         return responseBuffer;
-      //       }
-      //     }
-      //   ),
-      // },
-      // onError: (err, req, res) => {
-      //   res.status(500).json({ success: false, message: err.message });
-      // },
+      cookieDomainRewrite: false,
     })
   );
-  // middlewares.push((req, res, next) => {
-  //   console.log("proxy middlewares gaidyyys!!!");
-  //   next();
-  // });
-  // console.log("Proxy veikia", middlewares);
-  return middlewares;
-};
 
+  return middlewares;
+}
+
+// =======================================================
+//  LEIDŽIAMI KELIAI
+// =======================================================
 const allowlist = [
-  //   /^\/proposal-public\/get-proposals$/,
   /^\/auth-public\/login$/,
-  //   /^\/auth-public\/sendemailcode$/,
-  //   /^\/auth-public\/createuser$/,
-  //   /^\/members-public\/get-employees$/, //gauname bendrijos darbuotojus
-  //   /^\/chat-ai-public\/api\/chat\/[^/]+$/,
-  //   /^\/docstore-public\/all-docs?[^/]+$/,
-  //   // /^\/docstore-public\/upload-multiple-docs$/,
-  //   /^\/docstore-public\/doc-store\/[^/]+$/,
-  //   /^\/docstore-public\/thumbnails\/[^/]+$/,
-  //   /^\/posts-public\/get-posts?[^/]+$/,
-  //   /^\/image-public\/uploads\/[^/]+$/,
-  //   // /^\/auth-public\/getusers$/,
-  //   // /^\/members-public\/get-all-members?[^/]+$/,
-  //   /^\/vote-public\/all-votes?[^/]+$/,
-  //   /^\/vote-public\/one-vote?[^/]+$/,
+  /^\/auth-public\/sendemailcode$/,
+  /^\/auth-public\/createuser$/,
 ];
 
-// app.use(
-//   "/test",
-//   createProxyMiddleware({
-//     target: `http://localhost:4003/`,
-//     changeOrigin: true,
-//     onProxyReq: (proxyReq, req, res) => console.log("ProxyReq called"),
-//     onProxyRes: (proxyRes, req, res) => console.log("ProxyRes called"),
-//   })
-// );
-
+// Tikrinimas prieš public maršrutus
 app.use((req, res, next) => {
-  // 1️⃣ Jei kelias neturi "-public" → leidžiam
-  if (!req.path.includes("-public")) {
-    return next();
-  }
-
-  // 2️⃣ Jei kelias turi "-public", tikrinam pagal allowlist
+  if (!req.path.includes("-public")) return next();
   const isAllowed = allowlist.some((rule) => rule.test(req.path));
-  if (isAllowed) {
-    return next();
-  }
-
-  // 3️⃣ Jei nieko neatitiko → draudžiam
+  if (isAllowed) return next();
   return res.status(403).json({
     success: false,
     message: "Šis veiksmas leidžiamas tik autorizuotam vartotojui!",
   });
 });
 
-// Patiekti įkeltus failus (kad būtų galima pasiekti nuotraukas per URL)
+// =======================================================
+//  STATIC FILES
+// =======================================================
 app.use("/imageUploads/", express.static(imageUploadsDir));
-app.use(
-  "/auth",
-  // (req, res, next) => {
-  //   const midllewares = setupProxy(AUTHPORT, "auth", true);
-  //   console.log(
-  //     ">>> /auth middleware reached:",
-  //     req.method,
-  //     req.url,
-  //     midllewares
-  //   );
-  //   next();
-  // },
-  ...setupProxy(AUTHPORT, "auth", true)
-);
+
+// =======================================================
+//  PROXY MARŠRUTAI
+// =======================================================
+app.use("/auth", ...setupProxy(AUTHPORT, "auth", true));
 app.use("/auth-public", ...setupProxy(AUTHPORT, "auth", false));
 
 app.use("/clients-public", ...setupProxy(CLIENTPORT, "clients-public", false));
@@ -454,21 +293,15 @@ app.use(
 app.use("/docs", ...setupProxy(DOCSPORT, "docs", true));
 app.use("/docs-public", ...setupProxy(DOCSPORT, "docs-public", false));
 
-// app.use("/image-public", ...setupProxy(IMAGEPORT, "image-public", false));
-// app.use("/image", ...setupProxy(IMAGEPORT, "image", true));
-// // app.use("/image", proxy(IMAGEPORT, "image"));
-
-// // app.use("/email", proxy(EMAILPORT, "email"));
-
-// app.use("/proposal", ...setupProxy(PROPOSALPORT, "proposal", true));
-// app.use(
-//   "/proposal-public",
-//   ...setupProxy(PROPOSALPORT, "proposal-public", false)
-// );
-
-// app.use("/error", proxy(ERRORPORT, "error"));
+// =======================================================
+//  SERVER START
+// =======================================================
 app.listen(PORT, () => {
-  console.log(`Proxy Started at: ${BACKHOST}:${PORT}`);
+  console.log(`✅ Proxy Started at: ${BACKHOST}:${PORT}`);
 });
+
+// Jei reikėtų HTTPS (kai turėsi sertifikatus)
 // const httpsServer = https.createServer(credentials, app);
-// httpsServer.listen(PORT);
+// httpsServer.listen(PORT, () => {
+//   console.log(`✅ Proxy Started at: ${BACKHOST}:${PORT}`);
+// });

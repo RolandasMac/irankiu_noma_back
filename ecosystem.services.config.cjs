@@ -2,7 +2,7 @@ module.exports = {
   apps: [
     {
       name: "proxyService",
-      script: "./services/proxy/server1.js",
+      script: "./services/proxy/server.js",
       watch: true,
       watch_delay: 1000,
       autorestart: true,
@@ -74,6 +74,15 @@ module.exports = {
       autorestart: true,
       restart_delay: 2000,
       ignore_watch: [".git", "./services/toolsService/node_modules", "./store"],
+    },
+    {
+      name: "emailService",
+      script: "./services/emailService/server.js",
+      watch: true,
+      watch_delay: 1000,
+      autorestart: true,
+      restart_delay: 2000,
+      ignore_watch: [".git", "./services/emailService/node_modules", "./store"],
     },
   ],
 };

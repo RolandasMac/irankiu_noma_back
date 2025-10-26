@@ -1,53 +1,22 @@
-// controllers/userController.js
-
-// const User = require("../models/userSchema");
-// const bcrypt = require("bcrypt");
-// // const emailPlugin = require("../plugins/emailPlugin");
-// const authPlugin = require("../plugins/authPlugin");
-// // const { newError } = require("../plugins/helper");
-// // const { createSetings, getSetings } = require("../plugins/setings");
-// const jwt = require("jsonwebtoken");
-// const dotenv = require("dotenv");
-// const path = require("path");
-// dotenv.config({ path: path.resolve(__dirname, "../../.env") });
-// const { verify } = require("crypto");
-
 import { User } from "../models/userSchema.js";
 import bcrypt from "bcrypt";
-// import emailPlugin from "../plugins/emailPlugin.js";
 import { authPlugin } from "../plugins/authPlugin.js";
 // import { newError } from "../plugins/helper.js";
-// import { createSetings, getSetings } from "../plugins/setings.js";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import path from "path";
 import { verify } from "crypto";
-
-// Load environment variables from a .env file
+import { sendEmail } from "./../rabbit/sendEmail.js";
 import { fileURLToPath } from "url";
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.resolve(__dirname, "../../../.env") });
 
-const HOST_COKIE = process.env.HOSTCOKIE;
-// const {
-//   sendCoteMessageToError,
-//   sendCoteMessageToEmail,
-// } = require("../plugins/innerMessages");
+// const HOST_COKIE = process.env.HOSTCOKIE;
 
-// const Setings = require("../models/setingsSchema.js");
-// const { user } = require("../../../schemas/allSchemas.js");
-// const UAParser = require("ua-parser-js");
-// Generate a 6-digit code
-// const JWT_key = process.env.JWT_KEY;
-// const JWT_key = process.env.JWT_KEY;
 const JWT_SECRET = process.env.JWT_KEY;
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_KEY;
-// async function getParamsfromSetings() {
-//   const setings = await Setings.findOne({ admin: "admin" });
-//   console.log(setings);
-//   JWT_key = setings.jwtKey;
-// }
-// getParamsfromSetings();
+
 function generateVerificationCode() {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
@@ -73,29 +42,33 @@ export const sendEmailCode = async (req, res) => {
     if (!email) {
       throw new Error("El. paštas neperduotas");
     }
-    console.log(email);
+    // console.log(email);
+
     const subject = "Email patvirtinimo koda";
+    // console.log("subject", subject);
     const userEmail = await User.findOne({ email: email }).select("email");
-    if (userEmail) {
+    // console.log("userEmail", userEmail, userEmail.email === email);
+    if (userEmail?.email === email) {
       return res.status(200).json({
         message: "Toks el. paštas jau egzistuoja",
         success: false,
       });
     }
     const code = generateVerificationCode();
-    console.log(code);
+    // return res.status(200).json({ message: "Gerai", success: true, code });
+    // console.log(code);
     // code = "123456";
     const dataSave = authPlugin.saveEmail(email, code);
     // const sendEmail = await emailPlugin.sendVerifyEmail(email, subject, code);
     const data = {
-      mailTo: email,
+      email: email,
       subject,
       html: `<h1>${code}</h1>`,
     };
-    // const result = await sendCoteMessageToEmail(data);
-    console.log(result);
-    if (result === "Email išsiųstas sėkmingai") {
-      return res.status(200).json({ message: result, success: true, dataSave });
+    const result = await sendEmail(data);
+    // console.log(result);
+    if (result.success) {
+      return res.status(200).json({ ...result });
     }
     return res.status(200).json({ message: result, success: false });
   } catch (err) {
@@ -157,7 +130,6 @@ export const createUser = async (req, res) => {
     res.status(500).json({ success: false, message: err.message });
   }
 };
-
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -217,74 +189,76 @@ export const login = async (req, res) => {
     res.status(500).json({ success: false, message: "Serverio klaida" });
   }
 };
+// export const testas = async (req, res) => {
+// try {
+//   const userAgent = req.headers["user-agent"];
+//   console.log(`User-Agent: ${userAgent}`);
+//   // const parser = new UAParser();
+//   // const result = parser
+//   //   .setUA(
+//   //     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+//   //   )
+//   //   .getResult();
 
-export const testas = async (req, res) => {
-  try {
-    const userAgent = req.headers["user-agent"];
-    console.log(`User-Agent: ${userAgent}`);
-    // const parser = new UAParser();
-    // const result = parser
-    //   .setUA(
-    //     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
-    //   )
-    //   .getResult();
+//   // console.log(result);
 
-    // console.log(result);
+//   // *********************************************
+//   // const crypto = require("crypto");
 
-    // *********************************************
-    // const crypto = require("crypto");
+//   // const secret = "super-secret-key";
 
-    // const secret = "super-secret-key";
+//   // function generateSignedToken(data) {
+//   //   return crypto.createHmac("sha256", secret).update(data).digest("hex");
+//   // }
 
-    // function generateSignedToken(data) {
-    //   return crypto.createHmac("sha256", secret).update(data).digest("hex");
-    // }
+//   // const token = generateSignedToken("your-data");
+//   // console.log(token);
+//   // **********************************************
+//   // function verifySignedToken(token, data) {
+//   //   const expectedToken = generateSignedToken(data);
+//   //   return token === expectedToken;
+//   // }
 
-    // const token = generateSignedToken("your-data");
-    // console.log(token);
-    // **********************************************
-    // function verifySignedToken(token, data) {
-    //   const expectedToken = generateSignedToken(data);
-    //   return token === expectedToken;
-    // }
+//   // *********************************************
 
-    // *********************************************
+//   const { name } = req.loggedIn;
+//   if (!name) {
+//     throw new Error("Klaida gaunant prisijungimo duomenis");
+//   }
 
-    const { name } = req.loggedIn;
-    if (!name) {
-      throw new Error("Klaida gaunant prisijungimo duomenis");
-    }
+//   // sendCoteMessageToError("Žinutė perduota");
 
-    // sendCoteMessageToError("Žinutė perduota");
-
-    res.status(200).json({
-      message: `Vartotojas ${name} prisijungęs`,
-      success: true,
-      name,
-    });
-  } catch (err) {
-    const objError = {
-      service: "authService",
-      file: "controllers/authController",
-      place: "login",
-      error: err.message,
-    };
-    // await sendCoteMessageToError(objError);
-    res.status(500).json({ success: false, message: err.message });
-  }
-};
+//   res.status(200).json({
+//     message: `Vartotojas ${name} prisijungęs`,
+//     success: true,
+//     name,
+//   });
+// } catch (err) {
+//   const objError = {
+//     service: "authService",
+//     file: "controllers/authController",
+//     place: "login",
+//     error: err.message,
+//   };
+//   // await sendCoteMessageToError(objError);
+//   res.status(500).json({ success: false, message: err.message });
+// }
+// };
 export const test = async (req, res) => {
   // const data = req.body.data;
   // console.log("User: ", req.headers);
+
+  const emailData = {
+    email: "rolandas.macius@gmail.com",
+    subject: "Gaidys",
+    html: "<span>Gaidys<spam/>",
+  };
+  const response = await sendEmail(emailData);
+  console.log("response", response);
   return res.status(200).json({
     message: `test endpoint veikia`,
     success: true,
-    user: {
-      name: req.headers["x-user-name"],
-      email: req.headers["x-user-email"],
-      id: req.headers["x-user-id"],
-      roles: req.headers["x-user-roles"],
-    },
+    response,
   });
 
   try {
@@ -346,7 +320,6 @@ export const logout = async (req, res) => {
     res.status(500).json({ success: false, message: err.message });
   }
 };
-
 export const getusers = async (req, res) => {
   const query = req.query;
   if (!query) {
@@ -448,7 +421,6 @@ export const deleteuser = async (req, res) => {
     res.status(500).json({ success: false, message: err.message });
   }
 };
-
 export const refresh = async (req, res) => {
   try {
     // Variantai: refresh token gali atkeliauti body, header arba cookie.
