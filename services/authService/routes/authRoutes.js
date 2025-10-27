@@ -14,7 +14,7 @@ import { checkRole } from "../middleware/checkRole.js";
 
 const router = express.Router();
 router.post("/test", test);
-router.get("/getusers", checkRole(["admin"]), getusers);
+router.get("/getusers", checkRole(["admin", "manager"]), getusers);
 router.get("/logout", logout);
 router.post("/sendemailcode", sendEmailCode);
 router.post("/createuser", createUser);

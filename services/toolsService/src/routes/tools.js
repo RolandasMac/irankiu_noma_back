@@ -63,12 +63,13 @@ const upload = multer({
 });
 // -----------------
 
-router.get("/", checkRole(["admin"]), listTools);
-router.get("/:id", getTool);
-router.post("/:id", validateBody(toolSchema), updateTool);
-router.delete("/:id", deleteTool);
+router.get("/", checkRole(["admin", "manager"]), listTools);
+router.get("/:id", checkRole(["admin", "manager"]), getTool);
+router.post("/:id", checkRole(["admin"]), validateBody(toolSchema), updateTool);
+router.delete("/:id", checkRole(["admin"]), deleteTool);
 router.post(
   "/",
+  checkRole(["admin"]),
   upload.array("images"),
   transformBody,
   validateBody(toolSchema),
