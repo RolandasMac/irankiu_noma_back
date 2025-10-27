@@ -14,6 +14,7 @@ import path from "path";
 import fs from "fs";
 import paths from "../../../../config/paths.js";
 import { saveFiles } from "../middleware/saveFiles.js";
+import { checkRole } from "../middleware/checkRole.js";
 
 const { imageUploadsDir } = paths;
 const router = express.Router();
@@ -62,7 +63,7 @@ const upload = multer({
 });
 // -----------------
 
-router.get("/", listTools);
+router.get("/", checkRole(["admin"]), listTools);
 router.get("/:id", getTool);
 router.post("/:id", validateBody(toolSchema), updateTool);
 router.delete("/:id", deleteTool);
