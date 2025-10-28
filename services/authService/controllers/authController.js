@@ -44,7 +44,7 @@ export const sendEmailCode = async (req, res) => {
     }
     // console.log(email);
 
-    const subject = "Email patvirtinimo koda";
+    const subject = "Email patvirtinimo kodas";
     // console.log("subject", subject);
     const userEmail = await User.findOne({ email: email }).select("email");
     // console.log("userEmail", userEmail, userEmail.email === email);

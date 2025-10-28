@@ -17,7 +17,7 @@ const clientSchema = Joi.object({
   addres: Joi.string().trim().min(1).required(),
   phone: Joi.string().trim().min(1).required(),
   email: Joi.string().trim().email().required(),
-  pvnNr: Joi.string().trim().min(1).optional(),
+  pvnNr: Joi.string().trim().allow("").optional(),
 });
 
 router.get("/", listClients);
