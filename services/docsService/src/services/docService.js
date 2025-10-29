@@ -107,7 +107,7 @@ function createOrderdata(data) {
     rentPrice: data.tool.rentPrice,
     pay_sum: data.pay_sum,
     days: data.days,
-    payment_method: data.payment_method,
+    payment_method: data.payment_method.label,
     pvnNr: data.client.pvnNr ? data.client.pvnNr : "",
     pay_sum_words: pay_sum_words,
     clientId: data.client.id,

@@ -13,6 +13,7 @@ const router = express.Router();
 
 const clientSchema = Joi.object({
   id: Joi.string().optional(),
+  _id: Joi.string().trim().allow("").optional(),
   name: Joi.string().trim().min(1).required(),
   addres: Joi.string().trim().min(1).required(),
   phone: Joi.string().trim().min(1).required(),

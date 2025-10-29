@@ -38,7 +38,7 @@ export async function getOrder(req, res) {
 
 export async function createOrder(req, res) {
   console.log("Order1", req.body);
-  const {
+  let {
     client_id,
     clientName,
     tool_id,
@@ -53,7 +53,12 @@ export async function createOrder(req, res) {
     // pay_sum_words,
     lang,
   } = req.body;
-
+  let parsedPaymentMethod;
+  try {
+    parsedPaymentMethod = JSON.parse(payment_method);
+  } catch {
+    parsedPaymentMethod = { value: payment_method, label: payment_method };
+  }
   console.log(
     "req.body",
     client_id,
@@ -66,7 +71,7 @@ export async function createOrder(req, res) {
     discount,
     pay_sum,
     depozit,
-    payment_method,
+    (payment_method = parsedPaymentMethod),
     // pay_sum_words,
     lang
   );
@@ -81,7 +86,7 @@ export async function createOrder(req, res) {
     discount,
     pay_sum,
     depozit,
-    payment_method,
+    payment_method: parsedPaymentMethod.value,
   });
   const createdOrder = await order.save();
 
@@ -115,7 +120,7 @@ export async function createOrder(req, res) {
     date,
     date_until,
     pay_sum,
-    payment_method,
+    payment_method: parsedPaymentMethod,
     // pay_sum_words,
     lang,
   };
@@ -151,9 +156,43 @@ export async function createOrder(req, res) {
 
 export async function updateOrder(req, res) {
   const { id } = req.params;
-  const updates = req.body;
-  console.log("Updates", id, updates);
+  // const updates = req.body;
+  // console.log("Updates", id, updates);
+  let {
+    client_id,
+    clientName,
+    tool_id,
+    toolName,
+    date,
+    date_until,
+    days,
+    discount,
+    pay_sum,
+    depozit,
+    payment_method,
+    lang,
+  } = req.body;
+  let parsedPaymentMethod;
+  try {
+    parsedPaymentMethod = JSON.parse(payment_method);
+  } catch {
+    parsedPaymentMethod = { value: payment_method, label: payment_method };
+  }
 
+  const updates = {
+    client_id,
+    clientName,
+    tool_id,
+    toolName,
+    date,
+    date_until,
+    days,
+    discount,
+    pay_sum,
+    depozit,
+    payment_method: parsedPaymentMethod.value,
+    lang,
+  };
   const order = await Order.findByIdAndUpdate(id, updates, {
     new: true,
     runValidators: true,
@@ -193,7 +232,7 @@ export async function updateOrder(req, res) {
     date: updates.date,
     date_until: updates.date_until,
     pay_sum: payment,
-    payment_method: updates.payment_method,
+    payment_method: parsedPaymentMethod,
     // pay_sum_words: updates.pay_sum_words,
     docNr: order.docNr,
   };

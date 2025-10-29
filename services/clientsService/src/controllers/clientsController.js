@@ -48,10 +48,11 @@ export async function createClient(req, res) {
 }
 
 export async function updateClient(req, res) {
-  const { id } = req.params;
+  const { _id } = req.body;
+  console.log("_id", _id);
   const updates = req.body;
 
-  const client = await Client.findOneAndUpdate({ id }, updates, {
+  const client = await Client.findOneAndUpdate({ _id }, updates, {
     new: true,
     runValidators: true,
   });
