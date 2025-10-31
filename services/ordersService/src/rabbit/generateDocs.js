@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from "uuid";
  * @param {string} toolId
  * @returns {Promise<object|null>} tool object or null
  */
-export async function generateDocs(order) {
+export async function generateDocs(order, templates) {
   const channel = getChannel();
   const correlationId = uuidv4();
   const q = await channel.assertQueue("", { exclusive: true }); // temp reply queue
@@ -25,7 +25,7 @@ export async function generateDocs(order) {
 
     channel.sendToQueue(
       "ORDER_CREATED",
-      Buffer.from(JSON.stringify({ order })),
+      Buffer.from(JSON.stringify({ order, templates })),
       { correlationId, replyTo: q.queue }
     );
   });

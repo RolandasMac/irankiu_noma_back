@@ -9,7 +9,7 @@ import {
   deleteOrder,
   test,
 } from "../controllers/ordersController.js";
-
+import { checkRole } from "../middleware/checkRole.js";
 const router = express.Router();
 
 const orderSchema = Joi.object({
@@ -28,6 +28,7 @@ const orderSchema = Joi.object({
   // pay_sum_words: Joi.string(),
   days: Joi.number().required(),
   lang: Joi.string().required(),
+  docNr: Joi.string().optional(),
   // docs_urls: Joi.array()
   //   .items(Joi.object().pattern(Joi.string(), Joi.string()))
   //   .required(),
@@ -35,11 +36,21 @@ const orderSchema = Joi.object({
   // returned: Joi.boolean().required(),
 });
 
-router.get("/", listOrders);
-router.get("/:id", getOrder);
-router.post("/", validateBody(orderSchema), createOrder);
-router.put("/:id", validateBody(orderSchema), updateOrder);
-router.delete("/:id", deleteOrder);
-router.post("/test", test);
+router.get("/", checkRole(["admin", "manager"]), listOrders);
+router.get("/:id", checkRole(["admin", "manager"]), getOrder);
+router.post(
+  "/",
+  checkRole(["admin", "manager"]),
+  validateBody(orderSchema),
+  createOrder
+);
+router.put(
+  "/:id",
+  // checkRole(["admin", "manager"]),
+  // validateBody(orderSchema),
+  updateOrder
+);
+router.delete("/:id", checkRole(["admin"]), deleteOrder);
+router.post("/test", checkRole(["admin", "manager"]), test);
 
 export default router;

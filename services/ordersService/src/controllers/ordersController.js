@@ -33,6 +33,7 @@ export async function getOrder(req, res) {
   const order = await Order.findById(id).lean();
   if (!order)
     return res.status(404).json({ success: false, message: "Order not found" });
+  // console.log("Order", order);
   res.json({ success: true, order });
 }
 
@@ -123,6 +124,7 @@ export async function createOrder(req, res) {
     payment_method: parsedPaymentMethod,
     // pay_sum_words,
     lang,
+    depozit,
   };
 
   // ------------------------------------------
@@ -131,16 +133,34 @@ export async function createOrder(req, res) {
   const docNr = {
     contractNr: await getNextNumber("contract"),
     invoiceNr: await getNextNumber("invoice"),
-    receiptNr: await getNextNumber("receipt"),
+    receiptNr:
+      parsedPaymentMethod.value !== "debit"
+        ? await getNextNumber("receipt")
+        : "",
   };
   console.log("docNr", docNr);
   // ------------------------------------------
   orderFullData.docNr = docNr;
   console.log("orderFullData", orderFullData);
 
+  // formuojame tempaltes
+  let listTemplates = {};
+  if (parsedPaymentMethod.value === "debit") {
+    listTemplates = {
+      contract: "Nomas ligums.docx",
+      invoice: "Rekins.docx",
+    };
+  } else {
+    listTemplates = {
+      contract: "Nomas ligums.docx",
+      receipt: "Kvits.docx",
+      invoice: "Rekins.docx",
+    };
+  }
+
   // Duodama komanda generuoti dokumentus
   console.log("Duodama komanda generuoti dokumentus");
-  const docs = await generateDocs(orderFullData);
+  const docs = await generateDocs(orderFullData, listTemplates);
   console.log("docs", docs);
 
   const updatedOrder = await Order.findByIdAndUpdate(createdOrder._id, {
@@ -158,6 +178,7 @@ export async function updateOrder(req, res) {
   const { id } = req.params;
   // const updates = req.body;
   // console.log("Updates", id, updates);
+
   let {
     client_id,
     clientName,
@@ -171,6 +192,7 @@ export async function updateOrder(req, res) {
     depozit,
     payment_method,
     lang,
+    docNr,
   } = req.body;
   let parsedPaymentMethod;
   try {
@@ -178,6 +200,7 @@ export async function updateOrder(req, res) {
   } catch {
     parsedPaymentMethod = { value: payment_method, label: payment_method };
   }
+  console.log("DocNr", docNr);
 
   const updates = {
     client_id,
@@ -197,7 +220,7 @@ export async function updateOrder(req, res) {
     new: true,
     runValidators: true,
   });
-  // console.log("order'is", order);
+  console.log("order'is", order);
   if (!order)
     return res.status(404).json({ success: false, message: "Order not found" });
 
@@ -235,20 +258,63 @@ export async function updateOrder(req, res) {
     payment_method: parsedPaymentMethod,
     // pay_sum_words: updates.pay_sum_words,
     docNr: order.docNr,
+    depozit,
   };
   // console.log("orderFullData", orderFullData);
 
+  // Graziname registracijo numerius
+  console.log("pries xxx", docNr);
+
+  for (const [key, value] of Object.entries(docNr)) {
+    const name = key.replace("Nr", ""); // pvz. "invoiceNr" → "invoice"
+
+    await returnNumberToCounter(name, String(value));
+  }
+
+  // ------------------------------------------
+  // Generuoja doc numerius
+  // ------------------------------------------
+  const newDocNr = {
+    contractNr: await getNextNumber("contract"),
+    invoiceNr: await getNextNumber("invoice"),
+    receiptNr:
+      parsedPaymentMethod.value !== "debit"
+        ? await getNextNumber("receipt")
+        : "",
+  };
+  console.log("docNr", newDocNr);
+  // ------------------------------------------
+  orderFullData.docNr = newDocNr;
+  console.log("orderFullData", orderFullData);
+
+  // formuojame tempaltes
+  let listTemplates = {};
+  if (parsedPaymentMethod.value === "debit") {
+    listTemplates = {
+      contract: "Nomas ligums.docx",
+      invoice: "Rekins.docx",
+    };
+  } else {
+    listTemplates = {
+      contract: "Nomas ligums.docx",
+      receipt: "Kvits.docx",
+      invoice: "Rekins.docx",
+    };
+  }
+
   // Duodama komanda generuoti dokumentus
   console.log("Duodama komanda generuoti dokumentus");
-  const docs = await generateDocs(orderFullData);
+  const docs = await generateDocs(orderFullData, listTemplates);
   console.log("docs", docs);
+
   const updatedOrder = await Order.findByIdAndUpdate(order._id, {
     docs_urls: docs,
+    docNr,
   });
 
   // *******************************************************
 
-  res.json({ success: true, order });
+  res.json({ success: true, order: updatedOrder });
 }
 
 export async function deleteOrder(req, res) {

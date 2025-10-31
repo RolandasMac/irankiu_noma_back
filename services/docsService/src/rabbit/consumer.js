@@ -199,10 +199,10 @@ export async function startOrderConsumer() {
   channel.consume(orderQueue.queue, async (msg) => {
     if (!msg) return;
     try {
-      const order = JSON.parse(msg.content.toString());
+      const { order, templates } = JSON.parse(msg.content.toString());
       console.log("📄 [docs-service] Gauta ORDER_CREATED:", order);
 
-      const filePaths = await generateFromTemplate(order);
+      const filePaths = await generateFromTemplate(order, templates);
 
       console.log("✅ Sugeneruoti dokumentai:", filePaths);
 
@@ -222,10 +222,10 @@ export async function startOrderConsumer() {
   await channel.assertQueue("DOCS_GENERATE_BY_ORDER", { durable: true });
   channel.consume("DOCS_GENERATE_BY_ORDER", async (msg) => {
     try {
-      const order = JSON.parse(msg.content.toString());
+      const { order, templates } = JSON.parse(msg.content.toString());
       console.log("🧾 [docs-service] RPC DOCS_GENERATE_BY_ORDER:", order);
 
-      const filePaths = await generateDocumentsForOrder(order);
+      const filePaths = await generateDocumentsForOrder(order, templates);
 
       sendRpcResponse(channel, msg, { success: true, files: filePaths });
     } catch (err) {

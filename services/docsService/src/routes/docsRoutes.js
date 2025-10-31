@@ -21,7 +21,7 @@ router.post(
   upload.single("template"),
   controller.uploadTemplate
 );
-router.get("/templates", controller.getTemplates);
+// router.get("/templates", controller.getTemplates);
 router.post(
   "/documents/generate",
   express.json({ limit: "2mb" }),

@@ -15,15 +15,16 @@ const MONGODB_URI = process.env.MONGO_URI;
 async function start() {
   try {
     await connectDB(MONGODB_URI);
+
+    try {
+      await connectRabbit();
+      // startDocConsumer();
+    } catch (err) {
+      console.error("RabbitMQ not connected:", err);
+    }
     const app = createApp();
     app.listen(PORT, async () => {
       console.log(`✅ Orders service running at http://localhost:${PORT}`);
-      try {
-        await connectRabbit();
-        // startDocConsumer();
-      } catch (err) {
-        console.error("RabbitMQ not connected:", err);
-      }
     });
   } catch (err) {
     console.error("❌ Failed to start server:", err);

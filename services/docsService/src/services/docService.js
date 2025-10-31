@@ -40,13 +40,13 @@ import { numberToWords, locales } from "./../utils/numberToWords.js";
 const { templatesDir, generatedDir } = paths;
 
 // Nurodom statiškai
-export const listTemplates = {
-  contract: "Nomas ligums.docx",
-  receipt: "Kvits.docx",
-  invoice: "Rekins.docx",
-  // saskaita: "saskaita_template.docx",
-  // kvitas: "kvitas_template.docx",
-};
+// export const listTemplates = {
+//   contract: "Nomas ligums.docx",
+//   receipt: "Kvits.docx",
+//   invoice: "Rekins.docx",
+//   // saskaita: "saskaita_template.docx",
+//   // kvitas: "kvitas_template.docx",
+// };
 
 // Nurodom dinamiškai
 // export function listTemplates() {
@@ -54,12 +54,20 @@ export const listTemplates = {
 // }
 // const generatedDir = path.resolve("generated");
 
-export async function generateFromTemplate(order) {
+export async function generateFromTemplate(order, newTemplates) {
   if (!fs.existsSync(generatedDir)) fs.mkdirSync(generatedDir);
 
   const results = [];
-  const createdData = createOrderdata(order.order);
-  for (const [type, templateName] of Object.entries(listTemplates)) {
+  console.log("order", order);
+  const createdData = createOrderdata(order);
+  // let newTemplates = {};
+  // if (order.order.payment_method.value === "debit") {
+  //   const { contract, invoice } = listTemplates;
+  //   newTemplates = { contract, invoice };
+  // } else {
+  //   newTemplates = { ...listTemplates };
+  // }
+  for (const [type, templateName] of Object.entries(newTemplates)) {
     console.log("templateName", templateName, order);
     console.log("duomenys po paruošimo funkcijos", createdData);
     // const templatePath = path.resolve("templates", templateName);
@@ -90,7 +98,7 @@ export async function generateFromTemplate(order) {
 function createOrderdata(data) {
   console.log("Duomenys prieš paruošimą iš funkcijos", data);
   const locale = locales[data.lang];
-  const totallSum = data.pay_sum + data.tool.depozit;
+  const totallSum = data.pay_sum + data.depozit;
   const pay_sum_words = numberToWords(totallSum, locale);
   const newData = {
     id: data.id,
@@ -100,18 +108,18 @@ function createOrderdata(data) {
     email: data.client.email,
     phone: data.client.phone,
     toolName: data.tool.toolName,
-    toolPrice: data.tool.toolPrice,
-    depozit: data.tool.depozit,
+    toolPrice: data.tool.toolPrice.toFixed(2),
+    depozit: data.depozit.toFixed(2),
     dateFrom: new Date(data.date).toLocaleString(),
     dateUntil: new Date(data.date_until).toLocaleString(), //data.date_until,
     rentPrice: data.tool.rentPrice,
-    pay_sum: data.pay_sum,
+    pay_sum: data.pay_sum.toFixed(2),
     days: data.days,
     payment_method: data.payment_method.label,
     pvnNr: data.client.pvnNr ? data.client.pvnNr : "",
     pay_sum_words: pay_sum_words,
     clientId: data.client.id,
-    total_sum: totallSum,
+    total_sum: totallSum.toFixed(2),
     contractNr: data.docNr.contractNr,
     invoiceNr: data.docNr.invoiceNr,
     receiptNr: data.docNr.receiptNr,

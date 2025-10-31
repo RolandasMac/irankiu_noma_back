@@ -1,7 +1,7 @@
 import path from "path";
 import fs from "fs";
 import paths from "../../../../config/paths.js";
-import { listTemplates, generateFromTemplate } from "../services/docService.js";
+// import { listTemplates, generateFromTemplate } from "../services/docService.js";
 import { convertDocxToPdfWithLibre } from "../utils/libreConvert.js";
 
 const { templatesDir, generatedDir } = paths;
@@ -19,14 +19,14 @@ export async function uploadTemplate(req, res) {
   }
 }
 
-export async function getTemplates(req, res) {
-  try {
-    const files = listTemplates;
-    res.json({ success: true, templates: files });
-  } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
-  }
-}
+// export async function getTemplates(req, res) {
+//   try {
+//     const files = listTemplates;
+//     res.json({ success: true, templates: files });
+//   } catch (err) {
+//     res.status(500).json({ success: false, message: err.message });
+//   }
+// }
 
 export async function generateDocument(req, res) {
   try {
