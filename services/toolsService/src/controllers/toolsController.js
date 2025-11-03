@@ -88,30 +88,59 @@ export async function createTool(req, res) {
   });
 }
 
-export async function updateTool(req, res) {
-  const { id } = req.params;
-  const updates = req.body;
-  console.log("Updates", id, updates);
-  const tool = await Tool.findOneAndUpdate({ _id: id }, updates, {
-    new: true,
-    runValidators: true,
-  });
-  if (!tool)
-    return res.status(404).json({ success: false, message: "Tool not found" });
-
-  res.json({ success: true, tool, message: "Tool updated" });
-}
-
-// export async function deleteTool(req, res) {
+// export async function updateTool(req, res) {
 //   const { id } = req.params;
-//   console.log("Trynimas id", id);
-
-//   const tool = await Tool.findOneAndDelete({ _id: id });
+//   const updates = req.body;
+//   console.log("Updates", id, updates);
+//   const tool = await Tool.findOneAndUpdate({ _id: id }, updates, {
+//     new: true,
+//     runValidators: true,
+//   });
 //   if (!tool)
 //     return res.status(404).json({ success: false, message: "Tool not found" });
 
-//   res.json({ success: true, message: "Tool deleted" });
+//   res.json({ success: true, tool, message: "Tool updated" });
 // }
+
+export async function updateTool(req, res) {
+  const { id } = req.params;
+  const updates = req.body;
+
+  console.log("🔄 Updating tool:", {
+    id,
+    updates: { ...updates, images_urls: updates.images_urls?.length },
+  });
+
+  try {
+    const tool = await Tool.findOneAndUpdate({ _id: id }, updates, {
+      new: true,
+      runValidators: true,
+    });
+
+    if (!tool) {
+      console.log("❌ Tool not found:", id);
+      return res.status(404).json({
+        success: false,
+        message: "Įrankis nerastas",
+      });
+    }
+
+    console.log("✅ Tool updated successfully:", tool._id);
+    res.json({
+      success: true,
+      tool,
+      message: "Įrankis sėkmingai atnaujintas",
+    });
+  } catch (error) {
+    console.error("❌ Error updating tool:", error);
+    res.status(500).json({
+      success: false,
+      message: "Serverio klaida atnaujinant įrankį",
+      error: error.message,
+    });
+  }
+}
+
 export async function deleteTool(req, res) {
   const { id } = req.params;
   console.log("Trynimas id", id);

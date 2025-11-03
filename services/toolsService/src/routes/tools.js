@@ -15,9 +15,17 @@ import fs from "fs";
 import paths from "../../../../config/paths.js";
 import { saveFiles } from "../middleware/saveFiles.js";
 import { checkRole } from "../middleware/checkRole.js";
+import { transformUpdateBody } from "../middleware/transformUpdateBody.js";
+import { validateBeforeUpload } from "../middleware/validateBeforeUpload.js";
+import { saveUpdatedFiles } from "../middleware/saveUpdatedFiles.js";
 
 const { imageUploadsDir } = paths;
 const router = express.Router();
+
+// -------------------------------------
+//    Schemas
+// -------------------------------------
+
 const toolSchema = Joi.object({
   toolName: Joi.string().trim().min(1).required(),
   signs: Joi.string().trim().min(1),
@@ -34,6 +42,36 @@ const toolSchema = Joi.object({
   rented: Joi.boolean().optional().default(false),
   rented_until: Joi.date().optional().allow(null),
 });
+
+// Pagrindinė schema pirmajai validacijai (be failų)
+export const basicToolSchema = Joi.object({
+  toolName: Joi.string().required().min(1).max(255),
+  description: Joi.alternatives()
+    .try(Joi.array().items(Joi.string().min(1)), Joi.string().min(1))
+    .required(),
+  signs: Joi.alternatives().try(Joi.array().items(Joi.string()), Joi.string()),
+  toolPrice: Joi.number().min(0).required(),
+  rentPrice: Joi.number().min(0).required(),
+  depozit: Joi.number().min(0).required(),
+  rented: Joi.boolean().default(false),
+  rented_until: Joi.date().allow(null),
+  existingImages: Joi.array().items(Joi.string()),
+  deletedImages: Joi.array().items(Joi.string()),
+});
+
+// Pilna schema antrajai validacijai (su failais)
+export const fullToolSchema = Joi.object({
+  toolName: Joi.string().required().min(1).max(255),
+  description: Joi.array().items(Joi.string().min(1)).required(),
+  signs: Joi.array().items(Joi.string()),
+  toolPrice: Joi.number().min(0).required(),
+  rentPrice: Joi.number().min(0).required(),
+  depozit: Joi.number().min(0).required(),
+  rented: Joi.boolean().default(false),
+  rented_until: Joi.date().allow(null),
+  images_urls: Joi.array().items(Joi.string()).required(),
+});
+
 // -----Multer-----
 if (!fs.existsSync(imageUploadsDir)) {
   try {
@@ -65,16 +103,25 @@ const upload = multer({
 
 router.get("/", checkRole(["admin", "manager"]), listTools);
 router.get("/:id", checkRole(["admin", "manager"]), getTool);
-router.post("/:id", checkRole(["admin"]), validateBody(toolSchema), updateTool);
+// router.post("/:id", checkRole(["admin"]), validateBody(toolSchema), updateTool);
 router.delete("/:id", checkRole(["admin"]), deleteTool);
 router.post(
   "/",
   checkRole(["admin"]),
   upload.array("images"),
-  transformBody,
+  transformBody, //reikalingas tam, kad galima butu validuoti, ir tik po to saugoti failus.
   validateBody(toolSchema),
   saveFiles,
   createTool
 );
-
+router.put(
+  "/:id",
+  checkRole(["admin"]),
+  upload.array("images"),
+  transformUpdateBody, // 2. Transformuoti body
+  validateBeforeUpload(basicToolSchema), // 3. Validacija prieš failų išsaugojimą
+  saveUpdatedFiles, // 4. Išsaugoti failus (tik jei validacija pavyko)
+  validateBody(fullToolSchema), // 5. Galutinė validacija su failais
+  updateTool // 6. Atnaujinti įrašą
+);
 export default router;
