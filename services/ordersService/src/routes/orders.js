@@ -8,6 +8,7 @@ import {
   updateOrder,
   deleteOrder,
   test,
+  cancelOrder,
 } from "../controllers/ordersController.js";
 import { checkRole } from "../middleware/checkRole.js";
 const router = express.Router();
@@ -49,6 +50,12 @@ router.put(
   // checkRole(["admin", "manager"]),
   // validateBody(orderSchema),
   updateOrder
+);
+router.put(
+  "/cancel-order/:id",
+  // checkRole(["admin", "manager"]),
+  // validateBody(orderSchema),
+  cancelOrder
 );
 router.delete("/:id", checkRole(["admin"]), deleteOrder);
 router.post("/test", checkRole(["admin", "manager"]), test);

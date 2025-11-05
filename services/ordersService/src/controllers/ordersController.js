@@ -97,7 +97,7 @@ export async function createOrder(req, res) {
   console.log("client", client);
   // gauname tools duomenis iš tools serviso
   console.log("Prieš tools", tool_id);
-  const tool = await getToolById(tool_id);
+  const tool = await getToolById(tool_id, "get-tool");
   console.log("tool", tool);
   // gauname discounts duomenis iš discounts serviso
   console.log("Prieš discounts", tool_id);
@@ -167,6 +167,10 @@ export async function createOrder(req, res) {
     docs_urls: docs,
     docNr,
   });
+  const toolUpdated = await getToolById(tool_id, "update-tool", {
+    rented: true,
+    rented_until: updatedOrder.date_until,
+  });
   // await sendOrderEvent(order); // <--- čia išsiunčiam eventą
   // await publishOrderCreated(order);
   res
@@ -193,6 +197,8 @@ export async function updateOrder(req, res) {
     payment_method,
     lang,
     docNr,
+    paid,
+    returned,
   } = req.body;
   let parsedPaymentMethod;
   try {
@@ -200,7 +206,7 @@ export async function updateOrder(req, res) {
   } catch {
     parsedPaymentMethod = { value: payment_method, label: payment_method };
   }
-  console.log("DocNr", docNr);
+  console.log("DocNr", req.body);
 
   const updates = {
     client_id,
@@ -215,7 +221,28 @@ export async function updateOrder(req, res) {
     depozit,
     payment_method: parsedPaymentMethod.value,
     lang,
+    paid,
+    returned,
   };
+  // if (returned) {
+  //   const order = await Order.findByIdAndUpdate(id, updates, {
+  //     new: true,
+  //     runValidators: true,
+  //   });
+  //   console.log("order'is", order);
+  //   const tool = await getToolById(updates.tool_id, "update-tool", {
+  //     rented: true,
+  //     rented_until: date_until,
+  //   });
+  //   if (!order)
+  //     return res
+  //       .status(404)
+  //       .json({ success: false, message: "Order not found" });
+  //   return res
+  //     .status(201)
+  //     .json({ success: true, message: "Order updated", order });
+  // }
+
   const order = await Order.findByIdAndUpdate(id, updates, {
     new: true,
     runValidators: true,
@@ -231,7 +258,7 @@ export async function updateOrder(req, res) {
   console.log("client", client);
   // gauname tools duomenis iš tools serviso
   console.log("Prieš tools", updates.tool_id);
-  const tool = await getToolById(updates.tool_id);
+  const tool = await getToolById(updates.tool_id, "get-tool");
   console.log("tool", tool);
   // gauname discounts duomenis iš discounts serviso
   console.log("Prieš discounts", updates.tool_id);
@@ -312,9 +339,208 @@ export async function updateOrder(req, res) {
     docNr,
   });
 
+  const toolUpdates = await getToolById(tool_id, "update-tool", {
+    rented: true,
+    rented_until: date_until,
+  });
+
   // *******************************************************
 
   res.json({ success: true, order: updatedOrder });
+}
+export async function cancelOrder(req, res) {
+  const { id } = req.params;
+  // const updates = req.body;
+  // console.log("Updates", id, updates);
+  console.log("Gaidys", req.body.returned);
+  // return;
+  let {
+    client_id,
+    clientName,
+    tool_id,
+    toolName,
+    date,
+    date_until,
+    days,
+    discount,
+    pay_sum,
+    depozit,
+    payment_method,
+    lang,
+    docNr,
+    paid,
+    returned,
+  } = req.body;
+  let parsedPaymentMethod;
+  try {
+    parsedPaymentMethod = JSON.parse(payment_method);
+  } catch {
+    parsedPaymentMethod = { value: payment_method, label: payment_method };
+  }
+  console.log("returned", returned);
+
+  // const updates = {
+  //   client_id,
+  //   clientName,
+  //   tool_id,
+  //   toolName,
+  //   date,
+  //   date_until,
+  //   days,
+  //   discount,
+  //   pay_sum,
+  //   depozit,
+  //   payment_method: parsedPaymentMethod.value,
+  //   lang,
+  //   paid,
+  //   returned,
+  // };
+
+  if (returned === "true") {
+    console.log(returned);
+    const order = await Order.findByIdAndUpdate(
+      id,
+      { returned: true },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+    console.log("order'is", order);
+    const tool = await getToolById(tool_id, "update-tool", {
+      rented: false,
+      rented_until: null,
+    });
+    if (!order || !tool)
+      return res
+        .status(404)
+        .json({ success: false, message: "Order or tool not found" });
+    return res
+      .status(201)
+      .json({ success: true, message: "Order updated", order });
+  } else {
+    console.log(returned);
+    const order1 = await Order.findByIdAndUpdate(
+      id,
+      { returned: false },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+    console.log("order1'is", order1);
+    const tool = await getToolById(tool_id, "update-tool", {
+      rented: true,
+      rented_until: date_until,
+    });
+    if (!order1 || !tool)
+      return res
+        .status(404)
+        .json({ success: false, message: "Order not found" });
+    return res
+      .status(201)
+      .json({ success: true, message: "Order updated", order1 });
+  }
+
+  // const order = await Order.findByIdAndUpdate(id, updates, {
+  //   new: true,
+  //   runValidators: true,
+  // });
+  // console.log("order'is", order);
+  // if (!order)
+  //   return res.status(404).json({ success: false, message: "Order not found" });
+
+  // // *******************************************************
+  // // gauname kliento duomenis iš client servico
+  // console.log("Prieš klientą", updates.client_id);
+  // const client = await getClientById(updates.client_id);
+  // console.log("client", client);
+  // // gauname tools duomenis iš tools serviso
+  // console.log("Prieš tools", updates.tool_id);
+  // const tool = await getToolById(updates.tool_id, "get-tool");
+  // console.log("tool", tool);
+  // // gauname discounts duomenis iš discounts serviso
+  // console.log("Prieš discounts", updates.tool_id);
+  // const discounts = await getDiscount(updates.tool_id, updates.days);
+  // console.log("discounts", discounts);
+  // // Paskaičiuojame kainą
+
+  // tool.rentPrice = parseFloat(
+  //   (tool.rentPrice * (1 - updates.discount / 100)).toFixed(2)
+  // ).toFixed(2);
+  // const payment = updates.days * tool.rentPrice;
+  // console.log("payment", payment);
+
+  // const orderFullData = {
+  //   id: order._id,
+  //   client,
+  //   tool,
+  //   days: updates.days,
+  //   discount: updates.discount,
+  //   // payment,
+  //   date: updates.date,
+  //   date_until: updates.date_until,
+  //   pay_sum: payment,
+  //   payment_method: parsedPaymentMethod,
+  //   // pay_sum_words: updates.pay_sum_words,
+  //   docNr: order.docNr,
+  //   depozit,
+  // };
+  // // console.log("orderFullData", orderFullData);
+
+  // // Graziname registracijo numerius
+  // console.log("pries xxx", docNr);
+
+  // for (const [key, value] of Object.entries(docNr)) {
+  //   const name = key.replace("Nr", ""); // pvz. "invoiceNr" → "invoice"
+
+  //   await returnNumberToCounter(name, String(value));
+  // }
+
+  // // ------------------------------------------
+  // // Generuoja doc numerius
+  // // ------------------------------------------
+  // const newDocNr = {
+  //   contractNr: await getNextNumber("contract"),
+  //   invoiceNr: await getNextNumber("invoice"),
+  //   receiptNr:
+  //     parsedPaymentMethod.value !== "debit"
+  //       ? await getNextNumber("receipt")
+  //       : "",
+  // };
+  // console.log("docNr", newDocNr);
+  // // ------------------------------------------
+  // orderFullData.docNr = newDocNr;
+  // console.log("orderFullData", orderFullData);
+
+  // // formuojame tempaltes
+  // let listTemplates = {};
+  // if (parsedPaymentMethod.value === "debit") {
+  //   listTemplates = {
+  //     contract: "Nomas ligums.docx",
+  //     invoice: "Rekins.docx",
+  //   };
+  // } else {
+  //   listTemplates = {
+  //     contract: "Nomas ligums.docx",
+  //     receipt: "Kvits.docx",
+  //     invoice: "Rekins.docx",
+  //   };
+  // }
+
+  // // Duodama komanda generuoti dokumentus
+  // console.log("Duodama komanda generuoti dokumentus");
+  // const docs = await generateDocs(orderFullData, listTemplates);
+  // console.log("docs", docs);
+
+  // const updatedOrder = await Order.findByIdAndUpdate(order._id, {
+  //   docs_urls: docs,
+  //   docNr,
+  // });
+
+  // // *******************************************************
+
+  // res.json({ success: true, order: updatedOrder });
 }
 
 export async function deleteOrder(req, res) {

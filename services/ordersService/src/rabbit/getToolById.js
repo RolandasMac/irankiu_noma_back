@@ -4,9 +4,10 @@ import { v4 as uuidv4 } from "uuid";
 /**
  * Įrankio paieška per RPC.
  * @param {string} toolId
+ * @param {string} action
  * @returns {Promise<object|null>} tool object or null
  */
-export async function getToolById(toolId) {
+export async function getToolById(toolId, action, data = {}) {
   const channel = getChannel();
   const correlationId = uuidv4();
   const q = await channel.assertQueue("", { exclusive: true }); // temp reply queue
@@ -25,7 +26,7 @@ export async function getToolById(toolId) {
 
     channel.sendToQueue(
       "TOOLS_REQUEST",
-      Buffer.from(JSON.stringify({ toolId })),
+      Buffer.from(JSON.stringify({ toolId, action, data })),
       { correlationId, replyTo: q.queue }
     );
   });

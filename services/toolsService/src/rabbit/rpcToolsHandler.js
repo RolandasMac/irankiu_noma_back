@@ -12,10 +12,15 @@ export async function startToolsRpcListener() {
 
   channel.consume(queueName, async (msg) => {
     if (!msg) return;
-    const { toolId } = JSON.parse(msg.content.toString());
+    const { toolId, action, data } = JSON.parse(msg.content.toString());
 
     try {
-      const tool = await Tool.findById(toolId).lean();
+      let tool = null;
+      if (action === "get-tool") {
+        tool = await Tool.findById(toolId).lean();
+      } else if (action === "update-tool") {
+        tool = await Tool.findByIdAndUpdate(toolId, data, { new: true });
+      }
 
       channel.sendToQueue(
         msg.properties.replyTo,

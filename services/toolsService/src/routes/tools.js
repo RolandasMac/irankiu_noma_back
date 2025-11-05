@@ -8,6 +8,7 @@ import {
   createTool,
   updateTool,
   deleteTool,
+  listFreeTools,
 } from "../controllers/toolsController.js";
 import multer from "multer";
 import path from "path";
@@ -102,6 +103,7 @@ const upload = multer({
 // -----------------
 
 router.get("/", checkRole(["admin", "manager"]), listTools);
+router.get("/free-tools", checkRole(["admin", "manager"]), listFreeTools);
 router.get("/:id", checkRole(["admin", "manager"]), getTool);
 // router.post("/:id", checkRole(["admin"]), validateBody(toolSchema), updateTool);
 router.delete("/:id", checkRole(["admin"]), deleteTool);
