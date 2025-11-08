@@ -115,20 +115,6 @@ export async function createTool(req, res) {
   });
 }
 
-// export async function updateTool(req, res) {
-//   const { id } = req.params;
-//   const updates = req.body;
-//   console.log("Updates", id, updates);
-//   const tool = await Tool.findOneAndUpdate({ _id: id }, updates, {
-//     new: true,
-//     runValidators: true,
-//   });
-//   if (!tool)
-//     return res.status(404).json({ success: false, message: "Tool not found" });
-
-//   res.json({ success: true, tool, message: "Tool updated" });
-// }
-
 export async function updateTool(req, res) {
   const { id } = req.params;
   const updates = req.body;
@@ -209,5 +195,22 @@ export async function deleteTool(req, res) {
     res
       .status(500)
       .json({ success: false, message: "Serverio klaida trinant įrankį" });
+  }
+}
+export async function searchTool(req, res) {
+  try {
+    const search = req.query.search?.trim();
+    console.log(search);
+    let query = {};
+    if (search) {
+      // Paieška be didžiųjų/mažųjų raidžių jautrumo
+      query = { toolName: { $regex: search, $options: "i" } };
+    }
+
+    const tools = await Tool.find(query).limit(20); // limit kad neužkrautų
+    res.json({ success: true, data: tools });
+  } catch (error) {
+    console.error("❌ Klaida ieškant įrankių:", error);
+    res.status(500).json({ success: false, message: "Serverio klaida" });
   }
 }
