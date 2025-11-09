@@ -9,6 +9,7 @@ import {
   updateTool,
   deleteTool,
   listFreeTools,
+  searchTool,
 } from "../controllers/toolsController.js";
 import multer from "multer";
 import path from "path";
@@ -101,7 +102,7 @@ const upload = multer({
   },
 });
 // -----------------
-
+router.get("/search", checkRole(["admin"]), searchTool);
 router.get("/", checkRole(["admin", "manager"]), listTools);
 router.get("/free-tools", checkRole(["admin", "manager"]), listFreeTools);
 router.get("/:id", checkRole(["admin", "manager"]), getTool);
@@ -126,4 +127,5 @@ router.put(
   validateBody(fullToolSchema), // 5. Galutinė validacija su failais
   updateTool // 6. Atnaujinti įrašą
 );
+
 export default router;

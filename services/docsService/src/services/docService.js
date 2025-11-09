@@ -102,7 +102,7 @@ function createOrderdata(data) {
   const pay_sum_words = numberToWords(totallSum, locale);
   const newData = {
     id: data.id,
-    dateNow: new Date().toLocaleDateString(),
+    dateNow: new Date().toLocaleDateString("lv-LV"),
     clientName: data.client.name,
     addres: data.client.addres,
     email: data.client.email,
@@ -110,8 +110,8 @@ function createOrderdata(data) {
     toolName: data.tool.toolName,
     toolPrice: data.tool.toolPrice.toFixed(2),
     depozit: data.depozit.toFixed(2),
-    dateFrom: new Date(data.date).toLocaleString(),
-    dateUntil: new Date(data.date_until).toLocaleString(), //data.date_until,
+    dateFrom: new Date(data.date).toLocaleString("lv-LV"),
+    dateUntil: new Date(data.date_until).toLocaleString("lv-LV"), //data.date_until,
     rentPrice: data.tool.rentPrice,
     pay_sum: data.pay_sum.toFixed(2),
     days: data.days,

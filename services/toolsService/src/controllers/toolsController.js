@@ -200,6 +200,26 @@ export async function deleteTool(req, res) {
   }
 }
 
+export async function searchTool(req, res) {
+  try {
+    const search = req.query.search?.trim();
+    console.log(search);
+    let query = {};
+    if (search) {
+      // Paieška be didžiųjų/mažųjų raidžių jautrumo
+      query = { toolName: { $regex: search, $options: "i" } };
+    }
+
+    const tools = await Tool.find(query).limit(20); // limit kad neužkrautų
+    res.json({ success: true, data: tools });
+  } catch (error) {
+    console.error("❌ Klaida ieškant įrankių:", error);
+    res.status(500).json({ success: false, message: "Serverio klaida" });
+  }
+
+}
+
+
 // --------------------------------------------------------------------------------------
 // Util functions
 // --------------------------------------------------------------------------------------
