@@ -28,10 +28,10 @@ const { imageUploadsDir } = paths;
 //  SSL Sertifikatai
 // =======================================================
 
-// const pathServ = "/etc/letsencrypt/live/nuoma.macrol.lt/";
-// const privateKey = fs.readFileSync(`${pathServ}privkey.pem`);
-// const certificate = fs.readFileSync(`${pathServ}fullchain.pem`);
-// const credentials = { key: privateKey, cert: certificate };
+const pathServ = "/etc/letsencrypt/live/nuoma.macrol.lt/";
+const privateKey = fs.readFileSync(`${pathServ}privkey.pem`);
+const certificate = fs.readFileSync(`${pathServ}fullchain.pem`);
+const credentials = { key: privateKey, cert: certificate };
 
 // =======================================================
 //  DIR KONFIGŪRACIJA
@@ -296,12 +296,12 @@ app.use("/docs-public", ...setupProxy(DOCSPORT, "docs-public", false));
 // =======================================================
 //  SERVER START
 // =======================================================
-app.listen(PORT, () => {
-  console.log(`✅ Proxy Started at: ${BACKHOST}:${PORT}`);
-});
-
-// Jei reikėtų HTTPS (kai turėsi sertifikatus)
-// const httpsServer = https.createServer(credentials, app);
-// httpsServer.listen(PORT, () => {
+// app.listen(PORT, () => {
 //   console.log(`✅ Proxy Started at: ${BACKHOST}:${PORT}`);
 // });
+
+// Jei reikėtų HTTPS (kai turėsi sertifikatus)
+const httpsServer = https.createServer(credentials, app);
+httpsServer.listen(PORT, () => {
+  console.log(`✅ Proxy Started at: ${BACKHOST}:${PORT}`);
+});

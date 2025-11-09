@@ -1,33 +1,93 @@
 import Discount from "../models/Discount.js";
+import Tool from "../models/Tool.js";
+
+// export async function listDiscounts(req, res) {
+//   const page = Math.max(1, Number(req.query.page) || 1);
+//   const limit = Math.min(100, Number(req.query.limit) || 20);
+//   const desc = req.query.desc ? (req.query.desc === "true" ? -1 : 1) : -1;
+//   const skip = (page - 1) * limit;
+
+//   const filter = {};
+//   if (req.query.toolId) {
+//     filter.tools_id = { $in: [req.query.toolId] };
+//   }
+
+//   const [total, items] = await Promise.all([
+//     Discount.countDocuments(filter),
+//     Discount.find(filter)
+//       .sort({ createdAt: desc })
+//       .skip(skip)
+//       .limit(limit)
+//       .lean(),
+//   ]);
+
+//   res.json({
+//     success: true,
+//     message: "Discounts get successfuly",
+//     page,
+//     limit,
+//     total,
+//     items,
+//   });
+// }
 
 export async function listDiscounts(req, res) {
-  const page = Math.max(1, Number(req.query.page) || 1);
-  const limit = Math.min(100, Number(req.query.limit) || 20);
-  const desc = req.query.desc ? (req.query.desc === "true" ? -1 : 1) : -1;
-  const skip = (page - 1) * limit;
+  try {
+    const page = Math.max(1, Number(req.query.page) || 1);
+    const limit = Math.min(100, Number(req.query.limit) || 20);
+    const desc = req.query.desc ? (req.query.desc === "true" ? -1 : 1) : -1;
+    const skip = (page - 1) * limit;
 
-  const filter = {};
-  if (req.query.toolId) {
-    filter.tools_id = { $in: [req.query.toolId] };
+    const filter = {};
+    if (req.query.toolId) {
+      filter.tools_id = { $in: [req.query.toolId] };
+    }
+
+    // 👑 Ar reikia grąžinti su tools duomenimis?
+    const populateTools = req.query.populate === "true";
+
+    const [total, itemsRaw] = await Promise.all([
+      Discount.countDocuments(filter),
+      Discount.find(filter)
+        .sort({ createdAt: desc })
+        .skip(skip)
+        .limit(limit)
+        .populate(
+          true ? { path: "tools_id", select: "toolName images_urls" } : null
+        )
+        .lean(),
+    ]);
+
+    console.log("gauta", total, itemsRaw);
+    // 👁️ Jei populate=false, galime duomenis praplėsti rankiniu būdu (optional)
+    let items = itemsRaw;
+    if (populateTools) {
+      items = await Promise.all(
+        itemsRaw.map(async (d) => {
+          const tools = await Tool.find({ _id: { $in: d.tools_id } })
+            .select("toolName images_urls")
+            .lean();
+          return { ...d, tools };
+        })
+      );
+    }
+
+    res.json({
+      success: true,
+      message: "Discounts fetched successfully",
+      page,
+      limit,
+      total,
+      items,
+    });
+  } catch (err) {
+    console.error("❌ listDiscounts error:", err);
+    res.status(500).json({
+      success: false,
+      message: "Server error fetching discounts",
+      error: err.message,
+    });
   }
-
-  const [total, items] = await Promise.all([
-    Discount.countDocuments(filter),
-    Discount.find(filter)
-      .sort({ createdAt: desc })
-      .skip(skip)
-      .limit(limit)
-      .lean(),
-  ]);
-
-  res.json({
-    success: true,
-    message: "Discounts get successfuly",
-    page,
-    limit,
-    total,
-    items,
-  });
 }
 
 export async function getDiscount(req, res) {
