@@ -115,23 +115,11 @@ export async function createTool(req, res) {
   });
 }
 
-// export async function updateTool(req, res) {
-//   const { id } = req.params;
-//   const updates = req.body;
-//   console.log("Updates", id, updates);
-//   const tool = await Tool.findOneAndUpdate({ _id: id }, updates, {
-//     new: true,
-//     runValidators: true,
-//   });
-//   if (!tool)
-//     return res.status(404).json({ success: false, message: "Tool not found" });
-
-//   res.json({ success: true, tool, message: "Tool updated" });
-// }
-
 export async function updateTool(req, res) {
   const { id } = req.params;
   const updates = req.body;
+
+  updates.rented_until = mergeDateWithCurrentTime(updates.rented_until);
 
   console.log("🔄 Updating tool:", {
     id,
@@ -210,4 +198,25 @@ export async function deleteTool(req, res) {
       .status(500)
       .json({ success: false, message: "Serverio klaida trinant įrankį" });
   }
+}
+
+// --------------------------------------------------------------------------------------
+// Util functions
+// --------------------------------------------------------------------------------------
+
+function mergeDateWithCurrentTime(dateString) {
+  const datePart = new Date(dateString); // tik data iš input
+  const now = new Date(); // dabartinis laikas
+
+  // Sukuriam naują datą su data iš input + laiku iš dabartinio
+  const merged = new Date(
+    datePart.getFullYear(),
+    datePart.getMonth(),
+    datePart.getDate(),
+    now.getHours(),
+    now.getMinutes(),
+    now.getSeconds()
+  );
+
+  return merged;
 }
