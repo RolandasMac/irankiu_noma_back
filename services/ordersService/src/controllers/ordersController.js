@@ -283,6 +283,7 @@ export async function updateOrder(req, res) {
     date_until: updates.date_until,
     pay_sum: payment,
     payment_method: parsedPaymentMethod,
+    lang,
     // pay_sum_words: updates.pay_sum_words,
     docNr: order.docNr,
     depozit,
