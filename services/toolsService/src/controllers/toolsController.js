@@ -1,5 +1,5 @@
 import Tool from "../models/Tool.js";
-// import { v4 as uuidv4 } from "uuid";
+import Group from "../models/Groups.js";
 import path from "path";
 import fs from "fs";
 import paths from "../../../../config/paths.js";
@@ -78,13 +78,15 @@ export async function createTool(req, res) {
     rented,
     rented_until,
     images_urls,
+    group,
   } = req.body;
   if (
     !toolName ||
     !description ||
     isNaN(toolPrice) ||
     isNaN(rentPrice) ||
-    isNaN(depozit)
+    isNaN(depozit) ||
+    !group
   ) {
     return res
       .status(400)
@@ -104,6 +106,7 @@ export async function createTool(req, res) {
     depozit,
     rented,
     rented_until,
+    group,
   });
   await tool.save();
 
@@ -121,10 +124,10 @@ export async function updateTool(req, res) {
 
   updates.rented_until = mergeDateWithCurrentTime(updates.rented_until);
 
-  console.log("🔄 Updating tool:", {
-    id,
-    updates: { ...updates, images_urls: updates.images_urls?.length },
-  });
+  // console.log("🔄 Updating tool:", {
+  //   id,
+  //   updates: { ...updates, images_urls: updates.images_urls?.length },
+  // });
 
   try {
     const tool = await Tool.findOneAndUpdate({ _id: id }, updates, {
@@ -140,7 +143,7 @@ export async function updateTool(req, res) {
       });
     }
 
-    console.log("✅ Tool updated successfully:", tool._id);
+    // console.log("✅ Tool updated successfully:", tool._id);
     res.json({
       success: true,
       tool,
@@ -216,9 +219,18 @@ export async function searchTool(req, res) {
     console.error("❌ Klaida ieškant įrankių:", error);
     res.status(500).json({ success: false, message: "Serverio klaida" });
   }
-
 }
 
+export async function listGroups(req, res) {
+  console.log("Veikia groups");
+  try {
+    const groups = await Group.find();
+    res.json({ success: true, groups });
+  } catch (error) {
+    console.error("❌ Klaida ieškant įrankių:", error);
+    res.status(500).json({ success: false, message: "Serverio klaida" });
+  }
+}
 
 // --------------------------------------------------------------------------------------
 // Util functions

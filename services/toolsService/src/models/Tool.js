@@ -1,7 +1,17 @@
 import mongoose from "mongoose";
 import { tools } from "../../../../schemas/allSchemas.js";
 
-const toolSchema = new mongoose.Schema(tools, {
+// Pridedame group lauką, kuris priklauso Mongoose
+const schemaWithGroup = {
+  ...tools,
+  group: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Group",
+    required: true,
+  },
+};
+
+const toolSchema = new mongoose.Schema(schemaWithGroup, {
   timestamps: true,
 });
 

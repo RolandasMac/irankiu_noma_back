@@ -14,6 +14,7 @@ export async function transformBody(req, res, next) {
   req.body.rented_until = req.body.rented_until
     ? new Date(req.body.rented_until)
     : null;
+  req.body.group = req.body.group;
   console.log(req.body);
   next();
 }

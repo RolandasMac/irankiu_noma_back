@@ -2,6 +2,7 @@ import Joi from "joi";
 
 export function validateBody(schema) {
   return (req, res, next) => {
+    console.log("Validate middleware", req.body);
     const { error, value } = schema.validate(req.body, {
       abortEarly: false,
       stripUnknown: true,

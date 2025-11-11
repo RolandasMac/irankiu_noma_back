@@ -10,6 +10,7 @@ import {
   deleteTool,
   listFreeTools,
   searchTool,
+  listGroups,
 } from "../controllers/toolsController.js";
 import multer from "multer";
 import path from "path";
@@ -43,6 +44,7 @@ const toolSchema = Joi.object({
   depozit: Joi.number().optional(),
   rented: Joi.boolean().optional().default(false),
   rented_until: Joi.date().optional().allow(null),
+  group: Joi.string().required(),
 });
 
 // Pagrindinė schema pirmajai validacijai (be failų)
@@ -59,6 +61,7 @@ export const basicToolSchema = Joi.object({
   rented_until: Joi.date().allow(null),
   existingImages: Joi.array().items(Joi.string()),
   deletedImages: Joi.array().items(Joi.string()),
+  group: Joi.string().required(),
 });
 
 // Pilna schema antrajai validacijai (su failais)
@@ -72,6 +75,7 @@ export const fullToolSchema = Joi.object({
   rented: Joi.boolean().default(false),
   rented_until: Joi.date().allow(null),
   images_urls: Joi.array().items(Joi.string()).required(),
+  group: Joi.string().required(),
 });
 
 // -----Multer-----
@@ -105,9 +109,6 @@ const upload = multer({
 router.get("/search", checkRole(["admin"]), searchTool);
 router.get("/", checkRole(["admin", "manager"]), listTools);
 router.get("/free-tools", checkRole(["admin", "manager"]), listFreeTools);
-router.get("/:id", checkRole(["admin", "manager"]), getTool);
-// router.post("/:id", checkRole(["admin"]), validateBody(toolSchema), updateTool);
-router.delete("/:id", checkRole(["admin"]), deleteTool);
 router.post(
   "/",
   checkRole(["admin"]),
@@ -127,5 +128,7 @@ router.put(
   validateBody(fullToolSchema), // 5. Galutinė validacija su failais
   updateTool // 6. Atnaujinti įrašą
 );
-
+router.get("/get-groups", checkRole(["admin", "manager"]), listGroups);
+router.get("/:id", checkRole(["admin", "manager"]), getTool);
+router.delete("/:id", checkRole(["admin"]), deleteTool);
 export default router;

@@ -21,6 +21,7 @@ export const tools = {
   rented_until: { type: Date, required: false },
   signs: { type: [String], required: false, default: "" },
   rentPrice: { type: Number, required: true },
+  // group: { type: String, required: true },
 };
 export const orders = {
   client_id: { type: String, required: true },
@@ -57,7 +58,6 @@ export const discounts = {
   valid_from: { type: Date, required: true },
   valid_until: { type: Date, required: true },
 };
-
 export const user = {
   name: {
     type: String,
@@ -119,5 +119,13 @@ export const number = {
     type: Date,
     required: true,
     default: Date.now,
+  },
+};
+export const groups = {
+  group: { type: String, required: true },
+  templates: {
+    contract: { type: String, required: true },
+    invoice: { type: String, required: true },
+    receipt: { type: String, required: true },
   },
 };

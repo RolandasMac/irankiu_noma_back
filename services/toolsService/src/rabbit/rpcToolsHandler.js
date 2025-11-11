@@ -1,6 +1,6 @@
 import { getChannel } from "./rabbitConnection.js";
-import Tool from "../models/Tool.js"; // tavo Mongoose modelis
-
+import Tool from "../models/Tool.js";
+import Group from "../models/Groups.js";
 export async function startToolsRpcListener() {
   const channel = getChannel();
   const queueName = "TOOLS_REQUEST";
@@ -17,7 +17,8 @@ export async function startToolsRpcListener() {
     try {
       let tool = null;
       if (action === "get-tool") {
-        tool = await Tool.findById(toolId).lean();
+        // tool = await Tool.findById(toolId).lean();
+        tool = await Tool.findById(toolId).populate("group").lean();
       } else if (action === "update-tool") {
         tool = await Tool.findByIdAndUpdate(toolId, data, { new: true });
       }

@@ -53,7 +53,9 @@ export async function listDiscounts(req, res) {
         .skip(skip)
         .limit(limit)
         .populate(
-          true ? { path: "tools_id", select: "toolName images_urls" } : null
+          populateTools
+            ? { path: "tools_id", select: "toolName images_urls" }
+            : null
         )
         .lean(),
     ]);
