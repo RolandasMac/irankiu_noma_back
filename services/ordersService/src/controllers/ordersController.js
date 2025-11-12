@@ -145,16 +145,29 @@ export async function createOrder(req, res) {
 
   // formuojame tempaltes
   let listTemplates = {};
+  // if (parsedPaymentMethod.value === "debit") {
+  //   listTemplates = {
+  //     contract: "Nomas ligums.docx",
+  //     invoice: "Rekins.docx",
+  //   };
+  // } else {
+  //   listTemplates = {
+  //     contract: "Nomas ligums.docx",
+  //     receipt: "Kvits.docx",
+  //     invoice: "Rekins.docx",
+  //   };
+  // }
+
   if (parsedPaymentMethod.value === "debit") {
     listTemplates = {
-      contract: "Nomas ligums.docx",
-      invoice: "Rekins.docx",
+      contract: tool.group.templates.contract,
+      invoice: tool.group.templates.invoice,
     };
   } else {
     listTemplates = {
-      contract: "Nomas ligums.docx",
-      receipt: "Kvits.docx",
-      invoice: "Rekins.docx",
+      contract: tool.group.templates.contract,
+      receipt: tool.group.templates.receipt,
+      invoice: tool.group.templates.invoice,
     };
   }
 
@@ -317,20 +330,34 @@ export async function updateOrder(req, res) {
 
   // formuojame tempaltes
   let listTemplates = {};
+  // if (parsedPaymentMethod.value === "debit") {
+  //   listTemplates = {
+  //     contract: "Nomas ligums.docx",
+  //     invoice: "Rekins.docx",
+  //   };
+  // } else {
+  //   listTemplates = {
+  //     contract: "Nomas ligums.docx",
+  //     receipt: "Kvits.docx",
+  //     invoice: "Rekins.docx",
+  //   };
+  // }
+
+  // Duodama komanda generuoti dokumentus
+
   if (parsedPaymentMethod.value === "debit") {
     listTemplates = {
-      contract: "Nomas ligums.docx",
-      invoice: "Rekins.docx",
+      contract: tool.group.templates.contract,
+      invoice: tool.group.templates.invoice,
     };
   } else {
     listTemplates = {
-      contract: "Nomas ligums.docx",
-      receipt: "Kvits.docx",
-      invoice: "Rekins.docx",
+      contract: tool.group.templates.contract,
+      receipt: tool.group.templates.receipt,
+      invoice: tool.group.templates.invoice,
     };
   }
 
-  // Duodama komanda generuoti dokumentus
   console.log("Duodama komanda generuoti dokumentus");
   const docs = await generateDocs(orderFullData, listTemplates);
   console.log("docs", docs);

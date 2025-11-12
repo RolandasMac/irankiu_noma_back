@@ -21,6 +21,7 @@ export const tools = {
   rented_until: { type: Date, required: false },
   signs: { type: [String], required: false, default: "" },
   rentPrice: { type: Number, required: true },
+  // group: { type: String, required: true },
 };
 export const orders = {
   client_id: { type: String, required: true },
@@ -50,14 +51,14 @@ export const orders = {
   },
 };
 export const discounts = {
-  tools_id: { type: [String], required: true },
+  // tools_id: { type: [String], required: true },
+  tools_id: [{ type: "ObjectId", ref: "Tool", required: true }],
   min_days: { type: Number, required: true },
   max_days: { type: Number, required: true },
   discount: { type: Number, required: true },
   valid_from: { type: Date, required: true },
   valid_until: { type: Date, required: true },
 };
-
 export const user = {
   name: {
     type: String,
@@ -119,5 +120,17 @@ export const number = {
     type: Date,
     required: true,
     default: Date.now,
+  },
+};
+export const groups = {
+  group: {
+    type: String,
+    required: true,
+    enum: ["tool", "transport", "electronics"],
+  },
+  templates: {
+    contract: { type: String, required: true },
+    invoice: { type: String, required: true },
+    receipt: { type: String, required: true },
   },
 };
