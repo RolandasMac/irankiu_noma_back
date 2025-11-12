@@ -11,6 +11,8 @@ import {
   listFreeTools,
   searchTool,
   listGroups,
+  getTemplates,
+  createGroup,
 } from "../controllers/toolsController.js";
 import multer from "multer";
 import path from "path";
@@ -129,6 +131,10 @@ router.put(
   updateTool // 6. Atnaujinti įrašą
 );
 router.get("/get-groups", checkRole(["admin", "manager"]), listGroups);
+router.get("/get-templates", checkRole(["admin", "manager"]), getTemplates);
+router.post("/create-group", checkRole(["admin", "manager"]), createGroup);
+
 router.get("/:id", checkRole(["admin", "manager"]), getTool);
 router.delete("/:id", checkRole(["admin"]), deleteTool);
+
 export default router;

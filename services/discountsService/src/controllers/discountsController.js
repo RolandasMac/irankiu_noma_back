@@ -1,36 +1,6 @@
 import Discount from "../models/Discount.js";
 import Tool from "../models/Tool.js";
 
-// export async function listDiscounts(req, res) {
-//   const page = Math.max(1, Number(req.query.page) || 1);
-//   const limit = Math.min(100, Number(req.query.limit) || 20);
-//   const desc = req.query.desc ? (req.query.desc === "true" ? -1 : 1) : -1;
-//   const skip = (page - 1) * limit;
-
-//   const filter = {};
-//   if (req.query.toolId) {
-//     filter.tools_id = { $in: [req.query.toolId] };
-//   }
-
-//   const [total, items] = await Promise.all([
-//     Discount.countDocuments(filter),
-//     Discount.find(filter)
-//       .sort({ createdAt: desc })
-//       .skip(skip)
-//       .limit(limit)
-//       .lean(),
-//   ]);
-
-//   res.json({
-//     success: true,
-//     message: "Discounts get successfuly",
-//     page,
-//     limit,
-//     total,
-//     items,
-//   });
-// }
-
 export async function listDiscounts(req, res) {
   try {
     const page = Math.max(1, Number(req.query.page) || 1);
@@ -94,7 +64,12 @@ export async function listDiscounts(req, res) {
 
 export async function getDiscount(req, res) {
   const { id } = req.params;
-  const discount = await Discount.findById(id).lean();
+  const discount = await Discount.findById(id)
+    .populate({
+      path: "tools_id", // 👈 atitinka lauką schema
+      select: "toolName images_urls", // 👈 kokius laukus paimti
+    })
+    .lean();
   if (!discount)
     return res
       .status(404)

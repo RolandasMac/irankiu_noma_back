@@ -51,7 +51,8 @@ export const orders = {
   },
 };
 export const discounts = {
-  tools_id: { type: [String], required: true },
+  // tools_id: { type: [String], required: true },
+  tools_id: [{ type: "ObjectId", ref: "Tool", required: true }],
   min_days: { type: Number, required: true },
   max_days: { type: Number, required: true },
   discount: { type: Number, required: true },
@@ -122,7 +123,11 @@ export const number = {
   },
 };
 export const groups = {
-  group: { type: String, required: true },
+  group: {
+    type: String,
+    required: true,
+    enum: ["tool", "transport", "electronics"],
+  },
   templates: {
     contract: { type: String, required: true },
     invoice: { type: String, required: true },

@@ -4,7 +4,7 @@ import path from "path";
 import fs from "fs";
 import paths from "../../../../config/paths.js";
 
-const { imageUploadsDir } = paths;
+const { imageUploadsDir, templatesDir } = paths;
 export async function listTools(req, res) {
   const page = Math.max(1, Number(req.query.page) || 1);
   const limit = Math.min(100, Number(req.query.limit) || 20);
@@ -230,6 +230,27 @@ export async function listGroups(req, res) {
     console.error("❌ Klaida ieškant įrankių:", error);
     res.status(500).json({ success: false, message: "Serverio klaida" });
   }
+}
+
+export async function getTemplates(req, res) {
+  // const { group } = req.params;
+  // const dir = path.join("templates");
+
+  if (!fs.existsSync(templatesDir)) {
+    return res.status(404).json({ success: false, message: "Grupė nerasta" });
+  }
+
+  const files = fs.readdirSync(templatesDir).filter((f) => f.endsWith(".docx"));
+  res.json({ success: true, files });
+}
+
+export async function createGroup(req, res) {
+  const { group, templates } = req.body;
+  if (!group || !templates)
+    return res.status(400).json({ success: false, message: "Trūksta duomenų" });
+
+  const newGroup = await Group.create({ group, templates });
+  res.json({ success: true, group: newGroup });
 }
 
 // --------------------------------------------------------------------------------------
