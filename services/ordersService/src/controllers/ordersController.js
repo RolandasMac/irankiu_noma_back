@@ -16,15 +16,24 @@ export async function listOrders(req, res) {
   const client_id = req.query.client_id;
   const tool_id = req.query.tool_id;
 
-  const filter = {};
-  if (client_id) filter.client_id = client_id;
-  if (tool_id) filter.tool_id = tool_id;
+  const filter = {
+    $or: [],
+  };
+  if (client_id) {
+    filter.$or.push({ client_id: { $regex: client_id, $options: "i" } });
+    filter.$or.push({ clientName: { $regex: client_id, $options: "i" } });
+  }
+
+  if (tool_id) {
+    filter.$or.push({ tool_id: { $regex: tool_id, $options: "i" } });
+    filter.$or.push({ toolName: { $regex: tool_id, $options: "i" } });
+  }
 
   const [total, items] = await Promise.all([
     Order.countDocuments(filter),
     Order.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
   ]);
-
+  console.log("Rezultatas", total, items);
   res.json({ success: true, page, limit, total, items });
 }
 
@@ -219,7 +228,7 @@ export async function updateOrder(req, res) {
   } catch {
     parsedPaymentMethod = { value: payment_method, label: payment_method };
   }
-  console.log("DocNr", req.body);
+  console.log("DocNrxxx", req.body);
 
   const updates = {
     client_id,
@@ -378,10 +387,7 @@ export async function updateOrder(req, res) {
 }
 export async function cancelOrder(req, res) {
   const { id } = req.params;
-  // const updates = req.body;
-  // console.log("Updates", id, updates);
-  console.log("Gaidys", req.body.returned);
-  // return;
+
   let {
     client_id,
     clientName,
@@ -399,33 +405,15 @@ export async function cancelOrder(req, res) {
     paid,
     returned,
   } = req.body;
-  let parsedPaymentMethod;
-  try {
-    parsedPaymentMethod = JSON.parse(payment_method);
-  } catch {
-    parsedPaymentMethod = { value: payment_method, label: payment_method };
-  }
-  console.log("returned", returned);
+  // let parsedPaymentMethod;
+  // try {
+  //   parsedPaymentMethod = JSON.parse(payment_method);
+  // } catch {
+  //   parsedPaymentMethod = { value: payment_method, label: payment_method };
+  // }
 
-  // const updates = {
-  //   client_id,
-  //   clientName,
-  //   tool_id,
-  //   toolName,
-  //   date,
-  //   date_until,
-  //   days,
-  //   discount,
-  //   pay_sum,
-  //   depozit,
-  //   payment_method: parsedPaymentMethod.value,
-  //   lang,
-  //   paid,
-  //   returned,
-  // };
-
-  if (returned === "true") {
-    console.log(returned);
+  const oldOrder = await Order.findById(id).lean();
+  if (String(oldOrder.returned) !== String(returned) && returned === "true") {
     const order = await Order.findByIdAndUpdate(
       id,
       { returned: true },
@@ -434,7 +422,6 @@ export async function cancelOrder(req, res) {
         runValidators: true,
       }
     );
-    console.log("order'is", order);
     const tool = await getToolById(tool_id, "update-tool", {
       rented: false,
       rented_until: null,
@@ -446,8 +433,10 @@ export async function cancelOrder(req, res) {
     return res
       .status(201)
       .json({ success: true, message: "Order updated", order });
-  } else {
-    console.log(returned);
+  } else if (
+    String(oldOrder.returned) !== String(returned) &&
+    returned === "false"
+  ) {
     const order1 = await Order.findByIdAndUpdate(
       id,
       { returned: false },
@@ -456,12 +445,27 @@ export async function cancelOrder(req, res) {
         runValidators: true,
       }
     );
-    console.log("order1'is", order1);
     const tool = await getToolById(tool_id, "update-tool", {
       rented: true,
       rented_until: date_until,
     });
     if (!order1 || !tool)
+      return res
+        .status(404)
+        .json({ success: false, message: "Order not found" });
+    return res
+      .status(201)
+      .json({ success: true, message: "Order updated", order1 });
+  } else if (String(oldOrder.paid) !== String(paid)) {
+    const order1 = await Order.findByIdAndUpdate(
+      id,
+      { paid: paid === "true" ? true : false },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+    if (!order1)
       return res
         .status(404)
         .json({ success: false, message: "Order not found" });
