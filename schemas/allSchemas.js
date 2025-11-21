@@ -21,7 +21,8 @@ export const tools = {
   rented_until: { type: Date, required: false },
   signs: { type: [String], required: false, default: "" },
   rentPrice: { type: Number, required: true },
-  // group: { type: String, required: true },
+  group: { type: String, required: true },
+  required_addons: { type: [String], required: false },
 };
 export const orders = {
   client_id: { type: String, required: true },
@@ -133,4 +134,22 @@ export const groups = {
     invoice: { type: String, required: true },
     receipt: { type: String, required: true },
   },
+};
+export const addons = {
+  name: {
+    type: String,
+    required: true,
+  },
+  description: {
+    type: String,
+    required: false,
+  },
+  price: {
+    type: Number,
+    required: true,
+  },
+  // required_for_tool_id: {
+  //   type: [String],
+  //   required: false,
+  // },
 };

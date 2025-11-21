@@ -33,10 +33,13 @@ export async function listTools(req, res) {
 }
 
 export async function listFreeTools(req, res) {
+  //perduoti šiuos parametrus iš front-end
   const page = Math.max(1, Number(req.query.page) || 1);
   const limit = Math.min(100, Number(req.query.limit) || 20);
   const skip = (page - 1) * limit;
   const search = req.query.search ? String(req.query.search).trim() : null;
+
+  console.log("Užklausos parametrai", page, limit, skip, search);
 
   const filter = { rented: false };
   if (search) {
