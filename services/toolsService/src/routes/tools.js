@@ -23,6 +23,7 @@ import { checkRole } from "../middleware/checkRole.js";
 import { transformUpdateBody } from "../middleware/transformUpdateBody.js";
 import { validateBeforeUpload } from "../middleware/validateBeforeUpload.js";
 import { saveUpdatedFiles } from "../middleware/saveUpdatedFiles.js";
+import Addon from "../models/Addon.js";
 
 const { imageUploadsDir } = paths;
 const router = express.Router();
@@ -134,7 +135,77 @@ router.get("/get-groups", checkRole(["admin", "manager"]), listGroups);
 router.get("/get-templates", checkRole(["admin", "manager"]), getTemplates);
 router.post("/create-group", checkRole(["admin", "manager"]), createGroup);
 
+// =========================
+// CREATE – POST /addons
+// =========================
+router.post("/create-addon", async (req, res) => {
+  console.log("Gauta", req.body);
+  try {
+    const addon = new Addon(req.body);
+    await addon.save();
+    res.status(201).json({ success: true, addon });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// =========================
+// READ ALL – GET /addons
+// =========================
+router.get("/get-addons", async (req, res) => {
+  try {
+    const addons = await Addon.find();
+    res.status(200).json({ success: true, addons });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// =========================
+// READ ONE – GET /addons/:id
+// =========================
+router.get("/addon/:id", async (req, res) => {
+  try {
+    const addon = await Addon.findById(req.params.id);
+    if (!addon) return res.status(404).json({ error: "Not found" });
+    res.json({ success: true, addon });
+  } catch (err) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+// =========================
+// UPDATE – PUT /addons/:id
+// =========================
+router.put("/addon/:id", async (req, res) => {
+  try {
+    const addon = await Addon.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+    });
+
+    if (!addon)
+      return res.status(404).json({ success: false, error: "Not found" });
+
+    res.json({ success: true, addon });
+  } catch (err) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+// =========================
+// DELETE – DELETE /addons/:id
+// =========================
+router.delete("/addon/:id", async (req, res) => {
+  try {
+    const addon = await Addon.findByIdAndDelete(req.params.id);
+
+    if (!addon) return res.status(404).json({ error: "Not found" });
+
+    res.json({ success: true, message: "Deleted successfully" });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
 router.get("/:id", checkRole(["admin", "manager"]), getTool);
 router.delete("/:id", checkRole(["admin"]), deleteTool);
-
 export default router;
