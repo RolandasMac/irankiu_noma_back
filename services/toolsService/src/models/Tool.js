@@ -9,6 +9,13 @@ const schemaWithGroup = {
     ref: "Group",
     required: true,
   },
+  required_addons: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Addon",
+      required: false,
+    },
+  ],
 };
 
 const toolSchema = new mongoose.Schema(schemaWithGroup, {

@@ -113,18 +113,15 @@ export async function deleteDiscount(req, res) {
 export async function getDiscountsByToolId(req, res) {
   try {
     const { toolId } = req.params;
-    console.log("toolId:", toolId);
     // Dabartinė data (be laiko, kad palyginimas būtų dienos tikslumu)
     const today = new Date();
     // today.setHours(0, 0, 0, 0);
-    console.log("today", today);
     // Ieškome visų, kurių galiojimo laikotarpis apima šiandieną
     const discounts = await Discount.find({
       tools_id: toolId, // Mongoose automatiškai tikrina masyve (nereikia $in)
       valid_from: { $lte: today },
       valid_until: { $gte: today },
     });
-
     if (!discounts.length) {
       return res.status(404).json({
         success: false,

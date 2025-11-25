@@ -49,8 +49,17 @@ export async function listFreeTools(req, res) {
 
   const [total, items] = await Promise.all([
     Tool.countDocuments(filter),
-    Tool.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
+    Tool.find(filter)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .populate("required_addons")
+      .lean(),
   ]);
+
+  // tool = await Tool.findById(toolId).populate("group").lean();
+
+  console.log("gauta", total, items);
 
   res.json({
     success: true,
@@ -82,6 +91,7 @@ export async function createTool(req, res) {
     rented_until,
     images_urls,
     group,
+    required_addons,
   } = req.body;
   if (
     !toolName ||
@@ -110,6 +120,7 @@ export async function createTool(req, res) {
     rented,
     rented_until,
     group,
+    required_addons,
   });
   await tool.save();
 
@@ -124,7 +135,7 @@ export async function createTool(req, res) {
 export async function updateTool(req, res) {
   const { id } = req.params;
   const updates = req.body;
-
+  console.log("Updates", id);
   updates.rented_until = mergeDateWithCurrentTime(updates.rented_until);
 
   // console.log("🔄 Updating tool:", {

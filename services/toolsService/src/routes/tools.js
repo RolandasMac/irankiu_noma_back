@@ -48,6 +48,7 @@ const toolSchema = Joi.object({
   rented: Joi.boolean().optional().default(false),
   rented_until: Joi.date().optional().allow(null),
   group: Joi.string().required(),
+  required_addons: Joi.array().items(Joi.string()),
 });
 
 // Pagrindinė schema pirmajai validacijai (be failų)
@@ -65,6 +66,8 @@ export const basicToolSchema = Joi.object({
   existingImages: Joi.array().items(Joi.string()),
   deletedImages: Joi.array().items(Joi.string()),
   group: Joi.string().required(),
+  // required_addons: Joi.array().items(Joi.string()),
+  required_addons: Joi.array().items(Joi.string()).optional().allow(null),
 });
 
 // Pilna schema antrajai validacijai (su failais)
@@ -79,6 +82,7 @@ export const fullToolSchema = Joi.object({
   rented_until: Joi.date().allow(null),
   images_urls: Joi.array().items(Joi.string()).required(),
   group: Joi.string().required(),
+  required_addons: Joi.array().items(Joi.string()),
 });
 
 // -----Multer-----

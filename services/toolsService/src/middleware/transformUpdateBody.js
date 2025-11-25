@@ -46,6 +46,12 @@ export async function transformUpdateBody(req, res, next) {
     req.body.rented_until = req.body.rented_until
       ? new Date(req.body.rented_until)
       : null;
+    req.body.required_addons =
+      req.body.required_addons !== ""
+        ? !Array.isArray(req.body.required_addons)
+          ? [req.body.required_addons]
+          : req.body.required_addons
+        : [];
 
     console.log("🔄 Transformed body:", {
       toolName: req.body.toolName,
@@ -54,6 +60,12 @@ export async function transformUpdateBody(req, res, next) {
       rentPrice: req.body.rentPrice,
       existingImages: req.body.existingImages?.length,
       deletedImages: req.body.deletedImages?.length,
+      required_addons:
+        req.body.required_addons !== ""
+          ? !Array.isArray(req.body.required_addons)
+            ? [req.body.required_addons]
+            : req.body.required_addons
+          : [],
     });
 
     next();

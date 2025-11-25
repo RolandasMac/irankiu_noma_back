@@ -1,7 +1,7 @@
 export function validateBeforeUpload(schema) {
   return (req, res, next) => {
     console.log("🔄 Starting pre-upload validation...");
-
+    console.log("Veikia", req.body.required_addons);
     const { error, value } = schema.validate(req.body, {
       abortEarly: false,
       stripUnknown: true,

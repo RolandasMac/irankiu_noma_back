@@ -21,6 +21,11 @@ const discountSchema = Joi.object({
   valid_until: Joi.date().required(),
 });
 
+router.get(
+  "/toolId/:toolId",
+  checkRole(["admin", "manager"]),
+  getDiscountsByToolId
+);
 router.get("/", checkRole(["admin", "manager"]), listDiscounts);
 router.get("/:id", checkRole(["admin", "manager"]), getDiscount);
 router.post(
@@ -36,10 +41,5 @@ router.put(
   updateDiscount
 );
 router.delete("/:id", checkRole(["admin"]), deleteDiscount);
-router.get(
-  "/toolId/:toolId",
-  checkRole(["admin", "manager"]),
-  getDiscountsByToolId
-);
 
 export default router;

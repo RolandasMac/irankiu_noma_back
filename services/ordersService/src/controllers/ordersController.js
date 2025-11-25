@@ -62,6 +62,7 @@ export async function createOrder(req, res) {
     payment_method,
     // pay_sum_words,
     lang,
+    addons_total,
   } = req.body;
   let parsedPaymentMethod;
   try {
@@ -83,7 +84,8 @@ export async function createOrder(req, res) {
     depozit,
     (payment_method = parsedPaymentMethod),
     // pay_sum_words,
-    lang
+    lang,
+    addons_total
   );
   const order = new Order({
     client_id,
@@ -97,6 +99,7 @@ export async function createOrder(req, res) {
     pay_sum,
     depozit,
     payment_method: parsedPaymentMethod.value,
+    addons_total,
   });
   const createdOrder = await order.save();
 
