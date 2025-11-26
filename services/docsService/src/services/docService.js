@@ -101,8 +101,10 @@ function createOrderdata(data) {
   const totallSum = data.pay_sum + data.depozit;
   const pay_sum_words = numberToWords(totallSum, locale);
   // kuriame sąliginį laukelų, jeigu priedas egzistuoja
-  const has_addons = Number(data.addons_total) > 0;
-
+  const has_addons = data.addons.length > 0;
+  const addons_withtotal = data.addons.map((addon) => {
+    return { ...addon, total: addon.price * addon.quantity };
+  });
   const newData = {
     id: data.id,
     dateNow: new Date().toLocaleDateString("lv-LV"),
@@ -128,6 +130,7 @@ function createOrderdata(data) {
     receiptNr: data.docNr.receiptNr,
     addons_total: data.addons_total,
     has_addons: has_addons,
+    addons: addons_withtotal,
   };
   return newData;
 }

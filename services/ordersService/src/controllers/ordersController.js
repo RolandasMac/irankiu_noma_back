@@ -141,6 +141,7 @@ export async function createOrder(req, res) {
     lang,
     depozit,
     addons_total,
+    addons,
   };
 
   // ------------------------------------------
