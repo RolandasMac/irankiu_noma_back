@@ -51,6 +51,7 @@ export const orders = {
     receiptNr: { type: String, required: false },
   },
   addons_total: { type: Number, required: false },
+  addons: { type: [Object], required: false },
 };
 export const discounts = {
   // tools_id: { type: [String], required: true },
