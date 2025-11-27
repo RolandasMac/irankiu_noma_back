@@ -98,12 +98,16 @@ export async function generateFromTemplate(order, newTemplates) {
 function createOrderdata(data) {
   console.log("Duomenys prieš paruošimą iš funkcijos", data);
   const locale = locales[data.lang];
-  const totallSum = data.pay_sum + data.depozit;
+  const totallSum = data.pay_sum + data.addons_total + data.depozit;
   const pay_sum_words = numberToWords(totallSum, locale);
   // kuriame sąliginį laukelų, jeigu priedas egzistuoja
   const has_addons = data.addons.length > 0;
   const addons_withtotal = data.addons.map((addon) => {
-    return { ...addon, total: addon.price * addon.quantity };
+    return {
+      ...addon,
+      total: (addon.price * addon.quantity).toFixed(2),
+      price: addon.price.toFixed(2),
+    };
   });
   const newData = {
     id: data.id,
@@ -128,7 +132,7 @@ function createOrderdata(data) {
     contractNr: data.docNr.contractNr,
     invoiceNr: data.docNr.invoiceNr,
     receiptNr: data.docNr.receiptNr,
-    addons_total: data.addons_total,
+    addons_total: data.addons_total.toFixed(2),
     has_addons: has_addons,
     addons: addons_withtotal,
   };
