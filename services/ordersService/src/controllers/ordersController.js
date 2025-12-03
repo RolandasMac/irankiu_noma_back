@@ -209,6 +209,7 @@ export async function createOrder(req, res) {
 }
 
 export async function updateOrder(req, res) {
+  // reikia pakeisti returned tool
   const { id } = req.params;
   const updates1 = req.body;
   // console.log("Updates", id, updates1);
@@ -276,6 +277,14 @@ export async function updateOrder(req, res) {
   //     .status(201)
   //     .json({ success: true, message: "Order updated", order });
   // }
+  const oldOrder = await Order.findById(id).lean();
+  if (tool_id !== oldOrder.tool_id) {
+    const updatedTool = await getToolById(oldOrder.tool_id, "update-tool", {
+      rented: false,
+      rented_until: null,
+    });
+    if (!updatedTool) console.log("Tool rented set to false");
+  }
 
   const order = await Order.findByIdAndUpdate(id, updates, {
     new: true,
