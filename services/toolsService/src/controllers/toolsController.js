@@ -3,6 +3,7 @@ import Group from "../models/Groups.js";
 import path from "path";
 import fs from "fs";
 import paths from "../../../../config/paths.js";
+import mongoose from "mongoose";
 
 const { imageUploadsDir, templatesDir } = paths;
 export async function listTools(req, res) {
@@ -45,6 +46,68 @@ export async function listFreeTools(req, res) {
   if (search) {
     const re = new RegExp(search, "i");
     filter.$or = [{ name: re }, { description: re }];
+  }
+
+  const [total, items] = await Promise.all([
+    Tool.countDocuments(filter),
+    Tool.find(filter)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .populate("required_addons")
+      .lean(),
+  ]);
+
+  // tool = await Tool.findById(toolId).populate("group").lean();
+
+  console.log("gauta", total, items);
+
+  res.json({
+    success: true,
+    message: "Tools listed successfully",
+    page,
+    limit,
+    total,
+    items,
+  });
+}
+
+export async function listFreeToolsForEdit(req, res) {
+  //perduoti šiuos parametrus iš front-end
+  const toolId = req.params.id;
+  // console.log("toolId", toolId);
+  const page = Math.max(1, Number(req.query.page) || 1);
+  const limit = Math.min(100, Number(req.query.limit) || 20);
+  const skip = (page - 1) * limit;
+  const search = req.query.search ? String(req.query.search).trim() : null;
+
+  // console.log("Užklausos parametrai", page, limit, skip, search);
+
+  // const filter = { rented: false };
+  // if (search) {
+  //   const re = new RegExp(search, "i");
+  //   filter.$or = [{ name: re }, { description: re }];
+  // }
+
+  const filter = {
+    $and: [],
+  };
+
+  // 1. Logika: laisvi arba konkretus ID
+  if (toolId) {
+    filter.$and.push({
+      $or: [{ rented: false }, { _id: toolId }],
+    });
+  } else {
+    filter.$and.push({ rented: false });
+  }
+
+  // 2. Paieška
+  if (search) {
+    const re = new RegExp(search, "i");
+    filter.$and.push({
+      $or: [{ toolName: re }, { description: re }],
+    });
   }
 
   const [total, items] = await Promise.all([

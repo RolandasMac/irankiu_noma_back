@@ -210,9 +210,9 @@ export async function createOrder(req, res) {
 
 export async function updateOrder(req, res) {
   const { id } = req.params;
-  // const updates = req.body;
-  // console.log("Updates", id, updates);
-
+  const updates1 = req.body;
+  // console.log("Updates", id, updates1);
+  // return;
   let {
     client_id,
     clientName,
@@ -229,14 +229,16 @@ export async function updateOrder(req, res) {
     docNr,
     paid,
     returned,
+    addons_total,
+    addons,
   } = req.body;
-  let parsedPaymentMethod;
-  try {
-    parsedPaymentMethod = JSON.parse(payment_method);
-  } catch {
-    parsedPaymentMethod = { value: payment_method, label: payment_method };
-  }
-  console.log("DocNrxxx", req.body);
+  // let parsedPaymentMethod;
+  // try {
+  //   parsedPaymentMethod = JSON.parse(payment_method);
+  // } catch {
+  //   parsedPaymentMethod = { value: payment_method, label: payment_method };
+  // }
+  // console.log("DocNrxxx", req.body);
 
   const updates = {
     client_id,
@@ -249,10 +251,12 @@ export async function updateOrder(req, res) {
     discount,
     pay_sum,
     depozit,
-    payment_method: parsedPaymentMethod.value,
+    payment_method: payment_method.value,
     lang,
     paid,
     returned,
+    addons_total,
+    addons,
   };
   // if (returned) {
   //   const order = await Order.findByIdAndUpdate(id, updates, {
@@ -312,11 +316,13 @@ export async function updateOrder(req, res) {
     date: updates.date,
     date_until: updates.date_until,
     pay_sum: payment,
-    payment_method: parsedPaymentMethod,
+    payment_method: payment_method.value,
     lang,
     // pay_sum_words: updates.pay_sum_words,
     docNr: order.docNr,
     depozit,
+    addons_total,
+    addons,
   };
   // console.log("orderFullData", orderFullData);
 
@@ -336,9 +342,7 @@ export async function updateOrder(req, res) {
     contractNr: await getNextNumber("contract"),
     invoiceNr: await getNextNumber("invoice"),
     receiptNr:
-      parsedPaymentMethod.value !== "debit"
-        ? await getNextNumber("receipt")
-        : "",
+      payment_method.value !== "debit" ? await getNextNumber("receipt") : "",
   };
   console.log("docNr", newDocNr);
   // ------------------------------------------
@@ -362,7 +366,7 @@ export async function updateOrder(req, res) {
 
   // Duodama komanda generuoti dokumentus
 
-  if (parsedPaymentMethod.value === "debit") {
+  if (payment_method.value === "debit") {
     listTemplates = {
       contract: tool.group.templates.contract,
       invoice: tool.group.templates.invoice,

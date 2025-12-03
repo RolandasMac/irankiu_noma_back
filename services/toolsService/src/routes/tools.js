@@ -13,6 +13,7 @@ import {
   listGroups,
   getTemplates,
   createGroup,
+  listFreeToolsForEdit,
 } from "../controllers/toolsController.js";
 import multer from "multer";
 import path from "path";
@@ -116,6 +117,11 @@ const upload = multer({
 router.get("/search", checkRole(["admin"]), searchTool);
 router.get("/", checkRole(["admin", "manager"]), listTools);
 router.get("/free-tools", checkRole(["admin", "manager"]), listFreeTools);
+router.get(
+  "/free-tools-for-edit/:id",
+  checkRole(["admin", "manager"]),
+  listFreeToolsForEdit
+);
 router.post(
   "/",
   checkRole(["admin"]),
