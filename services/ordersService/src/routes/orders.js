@@ -26,23 +26,24 @@ const orderSchema = Joi.object({
   payment_method: Joi.string().required(),
   paid: Joi.boolean().required(),
   returned: Joi.boolean().required(),
-  // pay_sum_words: Joi.string(),
   days: Joi.number().required(),
   lang: Joi.string().required(),
-  docNr: Joi.string().optional(),
-  // docs_urls: Joi.array()
-  //   .items(Joi.object().pattern(Joi.string(), Joi.string()))
-  //   .required(),
-  // paid: Joi.boolean().required(),
-  // returned: Joi.boolean().required(),
+
+  // ✅ docNr kaip neprivalomas objektas:
+  docNr: Joi.object({
+    contractNr: Joi.string().allow("").optional(),
+    invoiceNr: Joi.string().allow("").optional(),
+    receiptNr: Joi.string().allow("").optional(),
+  }).optional(),
+
   addons_total: Joi.number().required(),
-  // addons: Joi.array().items(Joi.string()),
+
   addons: Joi.array()
     .items(
       Joi.object({
         name: Joi.string().trim().max(100).required(),
         price: Joi.number().precision(2).min(0).max(1000).required(),
-        id: Joi.string().hex().length(24).required(), // Jei naudojate MongoDB ObjectId
+        id: Joi.string().hex().length(24).required(),
         quantity: Joi.number().integer().min(1).max(99).required(),
       })
     )
@@ -60,13 +61,13 @@ router.post(
 );
 router.put(
   "/:id",
-  // checkRole(["admin", "manager"]),
-  // validateBody(orderSchema),
+  checkRole(["admin", "manager"]),
+  validateBody(orderSchema),
   updateOrder
 );
 router.put(
   "/cancel-order/:id",
-  // checkRole(["admin", "manager"]),
+  checkRole(["admin", "manager"]),
   // validateBody(orderSchema),
   cancelOrder
 );

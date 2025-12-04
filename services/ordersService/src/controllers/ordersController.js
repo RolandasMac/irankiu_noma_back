@@ -47,7 +47,6 @@ export async function getOrder(req, res) {
 }
 
 export async function createOrder(req, res) {
-  console.log("Order1", req.body);
   let {
     client_id,
     clientName,
@@ -60,35 +59,35 @@ export async function createOrder(req, res) {
     pay_sum,
     depozit,
     payment_method,
-    // pay_sum_words,
     lang,
     addons_total,
     addons,
   } = req.body;
-  let parsedPaymentMethod;
-  try {
-    parsedPaymentMethod = JSON.parse(payment_method);
-  } catch {
-    parsedPaymentMethod = { value: payment_method, label: payment_method };
-  }
-  console.log(
-    "req.body",
-    client_id,
-    clientName,
-    tool_id,
-    toolName,
-    date,
-    date_until,
-    days,
-    discount,
-    pay_sum,
-    depozit,
-    (payment_method = parsedPaymentMethod),
-    // pay_sum_words,
-    lang,
-    addons_total,
-    addons
-  );
+  // let parsedPaymentMethod;
+  // try {
+  //   parsedPaymentMethod = JSON.parse(payment_method);
+  // } catch {
+  //   parsedPaymentMethod = { value: payment_method, label: payment_method };
+  // }
+  // console.log(
+  //   "req.body",
+  //   client_id,
+  //   clientName,
+  //   tool_id,
+  //   toolName,
+  //   date,
+  //   date_until,
+  //   days,
+  //   discount,
+  //   pay_sum,
+  //   depozit,
+  //   payment_method,
+  //   // pay_sum_words,
+  //   lang,
+  //   addons_total,
+  //   addons
+  // );
+  // return;
   const order = new Order({
     client_id,
     clientName,
@@ -100,24 +99,25 @@ export async function createOrder(req, res) {
     discount,
     pay_sum,
     depozit,
-    payment_method: parsedPaymentMethod.value,
+    payment_method,
     addons_total,
     addons,
   });
-  const createdOrder = await order.save();
 
+  const createdOrder = await order.save();
+  // return;
   // gauname kliento duomenis iš client servico
-  console.log("Prieš klientą", client_id);
+  // console.log("Prieš klientą", client_id);
   const client = await getClientById(client_id);
-  console.log("client", client);
+  // console.log("client", client);
   // gauname tools duomenis iš tools serviso
-  console.log("Prieš tools", tool_id);
+  // console.log("Prieš tools", tool_id);
   const tool = await getToolById(tool_id, "get-tool");
-  console.log("tool", tool);
+  // console.log("tool", tool);
   // gauname discounts duomenis iš discounts serviso
-  console.log("Prieš discounts", tool_id);
+  // console.log("Prieš discounts", tool_id);
   const discounts = await getDiscount(tool_id, days);
-  console.log("discounts", discounts);
+  // console.log("discounts", discounts);
   // Paskaičiuojame kainą
   tool.rentPrice = parseFloat(
     (tool.rentPrice * (1 - discount / 100)).toFixed(2)
@@ -130,17 +130,17 @@ export async function createOrder(req, res) {
     id: createdOrder._id,
     client,
     tool,
-    days,
-    discount,
+    days: Number(days),
+    discount: Number(discount),
     // payment,
     date,
     date_until,
-    pay_sum,
-    payment_method: parsedPaymentMethod,
+    pay_sum: Number(pay_sum),
+    payment_method,
     // pay_sum_words,
     lang,
-    depozit,
-    addons_total,
+    depozit: Number(depozit),
+    addons_total: Number(addons_total) || 0,
     addons,
   };
 
@@ -150,15 +150,12 @@ export async function createOrder(req, res) {
   const docNr = {
     contractNr: await getNextNumber("contract"),
     invoiceNr: await getNextNumber("invoice"),
-    receiptNr:
-      parsedPaymentMethod.value !== "debit"
-        ? await getNextNumber("receipt")
-        : "",
+    receiptNr: payment_method !== "debit" ? await getNextNumber("receipt") : "",
   };
-  console.log("docNr", docNr);
+  // console.log("docNr", docNr);
   // ------------------------------------------
   orderFullData.docNr = docNr;
-  console.log("orderFullData", orderFullData);
+  // console.log("orderFullData", orderFullData);
 
   // formuojame tempaltes
   let listTemplates = {};
@@ -175,7 +172,7 @@ export async function createOrder(req, res) {
   //   };
   // }
 
-  if (parsedPaymentMethod.value === "debit") {
+  if (payment_method === "debit") {
     listTemplates = {
       contract: tool.group.templates.contract,
       invoice: tool.group.templates.invoice,
@@ -189,9 +186,9 @@ export async function createOrder(req, res) {
   }
 
   // Duodama komanda generuoti dokumentus
-  console.log("Duodama komanda generuoti dokumentus");
+  // console.log("Duodama komanda generuoti dokumentus");
   const docs = await generateDocs(orderFullData, listTemplates);
-  console.log("docs", docs);
+  // console.log("docs", docs);
 
   const updatedOrder = await Order.findByIdAndUpdate(createdOrder._id, {
     docs_urls: docs,
@@ -252,7 +249,7 @@ export async function updateOrder(req, res) {
     discount,
     pay_sum,
     depozit,
-    payment_method: payment_method.value,
+    payment_method,
     lang,
     paid,
     returned,
@@ -290,30 +287,30 @@ export async function updateOrder(req, res) {
     new: true,
     runValidators: true,
   });
-  console.log("order'is", order);
+  // console.log("order'is", order);
   if (!order)
     return res.status(404).json({ success: false, message: "Order not found" });
 
   // *******************************************************
   // gauname kliento duomenis iš client servico
-  console.log("Prieš klientą", updates.client_id);
+  // console.log("Prieš klientą", updates.client_id);
   const client = await getClientById(updates.client_id);
-  console.log("client", client);
+  // console.log("client", client);
   // gauname tools duomenis iš tools serviso
-  console.log("Prieš tools", updates.tool_id);
+  // console.log("Prieš tools", updates.tool_id);
   const tool = await getToolById(updates.tool_id, "get-tool");
-  console.log("tool", tool);
+  // console.log("tool", tool);
   // gauname discounts duomenis iš discounts serviso
-  console.log("Prieš discounts", updates.tool_id);
+  // console.log("Prieš discounts", updates.tool_id);
   const discounts = await getDiscount(updates.tool_id, updates.days);
-  console.log("discounts", discounts);
+  // console.log("discounts", discounts);
   // Paskaičiuojame kainą
 
   tool.rentPrice = parseFloat(
     (tool.rentPrice * (1 - updates.discount / 100)).toFixed(2)
   ).toFixed(2);
   const payment = updates.days * tool.rentPrice;
-  console.log("payment", payment);
+  // console.log("payment", payment);
 
   const orderFullData = {
     id: order._id,
@@ -325,7 +322,7 @@ export async function updateOrder(req, res) {
     date: updates.date,
     date_until: updates.date_until,
     pay_sum: payment,
-    payment_method: payment_method.value,
+    payment_method,
     lang,
     // pay_sum_words: updates.pay_sum_words,
     docNr: order.docNr,
@@ -350,8 +347,7 @@ export async function updateOrder(req, res) {
   const newDocNr = {
     contractNr: await getNextNumber("contract"),
     invoiceNr: await getNextNumber("invoice"),
-    receiptNr:
-      payment_method.value !== "debit" ? await getNextNumber("receipt") : "",
+    receiptNr: payment_method !== "debit" ? await getNextNumber("receipt") : "",
   };
   console.log("docNr", newDocNr);
   // ------------------------------------------
@@ -375,7 +371,7 @@ export async function updateOrder(req, res) {
 
   // Duodama komanda generuoti dokumentus
 
-  if (payment_method.value === "debit") {
+  if (payment_method === "debit") {
     listTemplates = {
       contract: tool.group.templates.contract,
       invoice: tool.group.templates.invoice,
