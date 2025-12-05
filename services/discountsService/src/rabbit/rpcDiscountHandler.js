@@ -6,14 +6,14 @@ export async function startDiscountRpcListener() {
   const queueName = "DISCOUNTS_REQUEST";
 
   await channel.assertQueue(queueName, { durable: true });
-  console.log(
-    `🐇 [discounts-service] Listening for RPC requests on "${queueName}"`
-  );
+  // console.log(
+  //   `🐇 [discounts-service] Listening for RPC requests on "${queueName}"`
+  // );
 
   channel.consume(queueName, async (msg) => {
     if (!msg) return;
     const { toolId, days } = JSON.parse(msg.content.toString());
-    console.log("toolId", toolId, days);
+    // console.log("toolId", toolId, days);
     try {
       // const discount = await Discount.findOne({ id: clientId }).lean();
       const today = new Date();
@@ -25,7 +25,7 @@ export async function startDiscountRpcListener() {
         max_days: { $gte: days },
       });
 
-      console.log("discount", discount[0].discount);
+      // console.log("discount", discount[0].discount);
       channel.sendToQueue(
         msg.properties.replyTo,
         Buffer.from(JSON.stringify(discount[0].discount || null)),

@@ -58,7 +58,7 @@ export async function generateFromTemplate(order, newTemplates) {
   if (!fs.existsSync(generatedDir)) fs.mkdirSync(generatedDir);
 
   const results = [];
-  console.log("order", order);
+  // console.log("order", order);
   const createdData = createOrderdata(order);
   // let newTemplates = {};
   // if (order.order.payment_method.value === "debit") {
@@ -68,8 +68,8 @@ export async function generateFromTemplate(order, newTemplates) {
   //   newTemplates = { ...listTemplates };
   // }
   for (const [type, templateName] of Object.entries(newTemplates)) {
-    console.log("templateName", templateName, order);
-    console.log("duomenys po paruošimo funkcijos", createdData);
+    // console.log("templateName", templateName, order);
+    // console.log("duomenys po paruošimo funkcijos", createdData);
     // const templatePath = path.resolve("templates", templateName);
     const templatePath = path.join(templatesDir, templateName);
     const content = fs.readFileSync(templatePath, "binary");
@@ -89,14 +89,14 @@ export async function generateFromTemplate(order, newTemplates) {
 
     results.push({ type, url: `${fileName}` });
   }
-  console.log("results", results);
+  // console.log("results", results);
   return results;
 }
 
 // Funkcija paruošti duomenis
 
 function createOrderdata(data) {
-  console.log("Duomenys prieš paruošimą iš funkcijos", data);
+  // console.log("Duomenys prieš paruošimą iš funkcijos", data);
   const locale = locales[data.lang];
   const totallSum = data.pay_sum + data.addons_total + data.depozit;
   const pay_sum_words = numberToWords(totallSum, locale);

@@ -93,7 +93,7 @@ export const createUser = async (req, res) => {
       );
     }
     const email = authPlugin.getEmailByCode(code);
-    console.log("email: ", email);
+    // console.log("email: ", email);
     if (!email || email !== email1) {
       return res.status(200).json({
         success: false,
@@ -133,7 +133,7 @@ export const createUser = async (req, res) => {
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    console.log("login data!!!", email);
+    // console.log("login data!!!", email);
     // Surandi user DB pagal email
     const user = await User.findOne({ email });
     if (!user) {
@@ -141,14 +141,14 @@ export const login = async (req, res) => {
         .status(401)
         .json({ success: false, message: "Neteisingi duomenys1" });
     }
-    console.log("User", user);
+    // console.log("User", user);
     const match = await bcrypt.compare(password, user.password);
     if (!match) {
       return res
         .status(401)
         .json({ success: false, message: "Neteisingi duomenys2" });
     }
-    console.log("Dar veikia", JWT_SECRET);
+    // console.log("Dar veikia", JWT_SECRET);
     const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user);
 
@@ -254,7 +254,7 @@ export const test = async (req, res) => {
     html: "<span>Gaidys<spam/>",
   };
   const response = await sendEmail(emailData);
-  console.log("response", response);
+  // console.log("response", response);
   return res.status(200).json({
     message: `test endpoint veikia`,
     success: true,
@@ -266,7 +266,7 @@ export const test = async (req, res) => {
     // console.log(`User-Agent: ${userAgent}`);
 
     // const result = await sendCoteMessageToEmail(data);
-    console.log(result);
+    // console.log(result);
     res.status(200).json({
       message: `test endpoint veikia`,
       success: true,
@@ -285,7 +285,7 @@ export const test = async (req, res) => {
 };
 export const logout = async (req, res) => {
   const cookie = req.cookies;
-  console.log("Logout veikia", cookie);
+  // console.log("Logout veikia", cookie);
   try {
     // const token = req.cookies.authtokenas_Rolas;
     // console.log("Gaidys veikia");
@@ -337,7 +337,7 @@ export const getusers = async (req, res) => {
   const desc = query.desc ? (query.desc === "true" ? 1 : -1) : 1;
   const skip = query.skip || 0;
   const limit = query.limit || 10;
-  console.log("AuthService", skip, limit, desc);
+  // console.log("AuthService", skip, limit, desc);
   try {
     const users = await User.find({}, { password: 0 })
       .sort({ createdAt: desc })
@@ -453,7 +453,7 @@ export const refresh = async (req, res) => {
     // 2️⃣ Jei nori patikrinti parašą (saugus variantas – rekomenduojamas)
     try {
       verified = jwt.verify(refreshToken, JWT_REFRESH_SECRET);
-      console.log("Verified payload:", verified);
+      // console.log("Verified payload:", verified);
     } catch (err) {
       console.error("Invalid or expired refresh token", err.message);
     }

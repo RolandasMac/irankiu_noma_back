@@ -30,7 +30,7 @@ export async function listDiscounts(req, res) {
         .lean(),
     ]);
 
-    console.log("gauta", total, itemsRaw);
+    // console.log("gauta", total, itemsRaw);
     // 👁️ Jei populate=false, galime duomenis praplėsti rankiniu būdu (optional)
     let items = itemsRaw;
     if (populateTools) {

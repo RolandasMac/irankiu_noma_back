@@ -33,7 +33,7 @@ export async function listOrders(req, res) {
     Order.countDocuments(filter),
     Order.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
   ]);
-  console.log("Rezultatas", total, items);
+  // console.log("Rezultatas", total, items);
   res.json({ success: true, page, limit, total, items });
 }
 
@@ -280,7 +280,7 @@ export async function updateOrder(req, res) {
       rented: false,
       rented_until: null,
     });
-    if (!updatedTool) console.log("Tool rented set to false");
+    // if (!updatedTool) console.log("Tool rented set to false");
   }
 
   const order = await Order.findByIdAndUpdate(id, updates, {
@@ -333,7 +333,7 @@ export async function updateOrder(req, res) {
   // console.log("orderFullData", orderFullData);
 
   // Graziname registracijo numerius
-  console.log("pries xxx", docNr);
+  // console.log("pries xxx", docNr);
 
   for (const [key, value] of Object.entries(docNr)) {
     const name = key.replace("Nr", ""); // pvz. "invoiceNr" → "invoice"
@@ -349,10 +349,10 @@ export async function updateOrder(req, res) {
     invoiceNr: await getNextNumber("invoice"),
     receiptNr: payment_method !== "debit" ? await getNextNumber("receipt") : "",
   };
-  console.log("docNr", newDocNr);
+  // console.log("docNr", newDocNr);
   // ------------------------------------------
   orderFullData.docNr = newDocNr;
-  console.log("orderFullData", orderFullData);
+  // console.log("orderFullData", orderFullData);
 
   // formuojame tempaltes
   let listTemplates = {};
@@ -384,13 +384,13 @@ export async function updateOrder(req, res) {
     };
   }
 
-  console.log("Duodama komanda generuoti dokumentus");
+  // console.log("Duodama komanda generuoti dokumentus");
   const docs = await generateDocs(orderFullData, listTemplates);
-  console.log("docs", docs);
+  // console.log("docs", docs);
 
   const updatedOrder = await Order.findByIdAndUpdate(order._id, {
     docs_urls: docs,
-    docNr,
+    docNr: newDocNr,
   });
 
   const toolUpdates = await getToolById(tool_id, "update-tool", {
@@ -498,7 +498,7 @@ export async function deleteOrder(req, res) {
   if (!order)
     return res.status(404).json({ success: false, message: "Order not found" });
 
-  console.log("order", order);
+  // console.log("order", order);
   // ------------------------------------------------------
   //  Ištrinto dokumento numerį įdedame atgal naudojimui
   // ------------------------------------------------------
@@ -545,7 +545,7 @@ export async function test(req, res) {
   // Duoda sekantį prieinamą numerį
   number = await getNextNumber(type);
 
-  console.log("number", number);
+  // console.log("number", number);
 
   res.json({
     success: true,
@@ -580,5 +580,5 @@ export async function returnNumberToCounter(type, docNumber) {
     { $push: { availableNumbers: { $each: [num], $sort: 1 } } }
   );
 
-  console.log(`✅ Numeris ${num} (${docNumber}) grąžintas į ${type}_${year}`);
+  // console.log(`✅ Numeris ${num} (${docNumber}) grąžintas į ${type}_${year}`);
 }

@@ -40,7 +40,7 @@ export async function listFreeTools(req, res) {
   const skip = (page - 1) * limit;
   const search = req.query.search ? String(req.query.search).trim() : null;
 
-  console.log("Užklausos parametrai", page, limit, skip, search);
+  // console.log("Užklausos parametrai", page, limit, skip, search);
 
   const filter = { rented: false };
   if (search) {
@@ -60,7 +60,7 @@ export async function listFreeTools(req, res) {
 
   // tool = await Tool.findById(toolId).populate("group").lean();
 
-  console.log("gauta", total, items);
+  // console.log("gauta", total, items);
 
   res.json({
     success: true,
@@ -122,7 +122,7 @@ export async function listFreeToolsForEdit(req, res) {
 
   // tool = await Tool.findById(toolId).populate("group").lean();
 
-  console.log("gauta", total, items);
+  // console.log("gauta", total, items);
 
   res.json({
     success: true,
@@ -198,7 +198,7 @@ export async function createTool(req, res) {
 export async function updateTool(req, res) {
   const { id } = req.params;
   const updates = req.body;
-  console.log("Updates", id);
+  // console.log("Updates", id);
   updates.rented_until = mergeDateWithCurrentTime(updates.rented_until);
 
   // console.log("🔄 Updating tool:", {
@@ -213,7 +213,7 @@ export async function updateTool(req, res) {
     });
 
     if (!tool) {
-      console.log("❌ Tool not found:", id);
+      // console.log("❌ Tool not found:", id);
       return res.status(404).json({
         success: false,
         message: "Įrankis nerastas",
@@ -238,7 +238,7 @@ export async function updateTool(req, res) {
 
 export async function deleteTool(req, res) {
   const { id } = req.params;
-  console.log("Trynimas id", id);
+  // console.log("Trynimas id", id);
 
   try {
     // 1️⃣ Randame įrankį pagal ID
@@ -283,7 +283,7 @@ export async function deleteTool(req, res) {
 export async function searchTool(req, res) {
   try {
     const search = req.query.search?.trim();
-    console.log(search);
+    // console.log(search);
     let query = {};
     if (search) {
       // Paieška be didžiųjų/mažųjų raidžių jautrumo
@@ -299,7 +299,7 @@ export async function searchTool(req, res) {
 }
 
 export async function listGroups(req, res) {
-  console.log("Veikia groups");
+  // console.log("Veikia groups");
   try {
     const groups = await Group.find();
     res.json({ success: true, groups });

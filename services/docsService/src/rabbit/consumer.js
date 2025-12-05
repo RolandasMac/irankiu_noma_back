@@ -200,11 +200,11 @@ export async function startOrderConsumer() {
     if (!msg) return;
     try {
       const { order, templates } = JSON.parse(msg.content.toString());
-      console.log("📄 [docs-service] Gauta ORDER_CREATED:", order);
+      // console.log("📄 [docs-service] Gauta ORDER_CREATED:", order);
 
       const filePaths = await generateFromTemplate(order, templates);
 
-      console.log("✅ Sugeneruoti dokumentai:", filePaths);
+      // console.log("✅ Sugeneruoti dokumentai:", filePaths);
 
       channel.sendToQueue(
         msg.properties.replyTo,
@@ -223,7 +223,7 @@ export async function startOrderConsumer() {
   channel.consume("DOCS_GENERATE_BY_ORDER", async (msg) => {
     try {
       const { order, templates } = JSON.parse(msg.content.toString());
-      console.log("🧾 [docs-service] RPC DOCS_GENERATE_BY_ORDER:", order);
+      // console.log("🧾 [docs-service] RPC DOCS_GENERATE_BY_ORDER:", order);
 
       const filePaths = await generateDocumentsForOrder(order, templates);
 
@@ -235,5 +235,5 @@ export async function startOrderConsumer() {
     }
   });
 
-  console.log("📡 [docs-service] Visi listeneriai paleisti");
+  // console.log("📡 [docs-service] Visi listeneriai paleisti");
 }
