@@ -123,9 +123,11 @@ export async function getDiscountsByToolId(req, res) {
       valid_until: { $gte: today },
     });
     if (!discounts.length) {
-      return res.status(404).json({
-        success: false,
+      return res.status(200).json({
+        success: true,
         message: "Šiuo metu nėra galiojančių nuolaidų šiam įrankiui.",
+        count: 0,
+        data: [],
       });
     }
 
