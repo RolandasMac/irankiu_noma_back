@@ -1,6 +1,6 @@
 export async function transformUpdateBody(req, res, next) {
   try {
-    req.body.toolName = req.body.toolName || "";
+    req.body.toolName = req.body.toolName;
 
     // Apdoroti signs kaip masyvą
     if (typeof req.body.signs === "string") {
@@ -46,6 +46,7 @@ export async function transformUpdateBody(req, res, next) {
     req.body.rented_until = req.body.rented_until
       ? new Date(req.body.rented_until)
       : null;
+
     req.body.required_addons =
       req.body.required_addons !== ""
         ? !Array.isArray(req.body.required_addons)
@@ -53,24 +54,24 @@ export async function transformUpdateBody(req, res, next) {
           : req.body.required_addons
         : [];
 
-    console.log("🔄 Transformed body:", {
-      toolName: req.body.toolName,
-      description: req.body.description,
-      toolPrice: req.body.toolPrice,
-      rentPrice: req.body.rentPrice,
-      existingImages: req.body.existingImages?.length,
-      deletedImages: req.body.deletedImages?.length,
-      required_addons:
-        req.body.required_addons !== ""
-          ? !Array.isArray(req.body.required_addons)
-            ? [req.body.required_addons]
-            : req.body.required_addons
-          : [],
-    });
+    // console.log("🔄 Transformed body:", {
+    //   toolName: req.body.toolName,
+    //   description: req.body.description,
+    //   toolPrice: req.body.toolPrice,
+    //   rentPrice: req.body.rentPrice,
+    //   existingImages: req.body.existingImages?.length,
+    //   deletedImages: req.body.deletedImages?.length,
+    //   required_addons:
+    //     req.body.required_addons !== ""
+    //       ? !Array.isArray(req.body.required_addons)
+    //         ? [req.body.required_addons]
+    //         : req.body.required_addons
+    //       : [],
+    // });
 
     next();
   } catch (error) {
-    console.error("Transform body error:", error);
+    // console.error("Transform body error:", error);
     res.status(400).json({
       success: false,
       message: "Invalid request data",

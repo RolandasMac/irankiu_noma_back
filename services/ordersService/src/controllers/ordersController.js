@@ -99,7 +99,7 @@ export async function createOrder(req, res) {
     discount,
     pay_sum,
     depozit,
-    payment_method,
+    payment_method: payment_method.value,
     addons_total,
     addons,
   });
@@ -150,7 +150,8 @@ export async function createOrder(req, res) {
   const docNr = {
     contractNr: await getNextNumber("contract"),
     invoiceNr: await getNextNumber("invoice"),
-    receiptNr: payment_method !== "debit" ? await getNextNumber("receipt") : "",
+    receiptNr:
+      payment_method.value !== "debit" ? await getNextNumber("receipt") : "",
   };
   // console.log("docNr", docNr);
   // ------------------------------------------
@@ -172,7 +173,7 @@ export async function createOrder(req, res) {
   //   };
   // }
 
-  if (payment_method === "debit") {
+  if (payment_method.value === "debit") {
     listTemplates = {
       contract: tool.group.templates.contract,
       invoice: tool.group.templates.invoice,
@@ -236,7 +237,6 @@ export async function updateOrder(req, res) {
   // } catch {
   //   parsedPaymentMethod = { value: payment_method, label: payment_method };
   // }
-  // console.log("DocNrxxx", req.body);
 
   const updates = {
     client_id,
@@ -249,7 +249,7 @@ export async function updateOrder(req, res) {
     discount,
     pay_sum,
     depozit,
-    payment_method,
+    payment_method: payment_method.value,
     lang,
     paid,
     returned,
@@ -347,7 +347,8 @@ export async function updateOrder(req, res) {
   const newDocNr = {
     contractNr: await getNextNumber("contract"),
     invoiceNr: await getNextNumber("invoice"),
-    receiptNr: payment_method !== "debit" ? await getNextNumber("receipt") : "",
+    receiptNr:
+      payment_method.value !== "debit" ? await getNextNumber("receipt") : "",
   };
   // console.log("docNr", newDocNr);
   // ------------------------------------------
@@ -371,7 +372,7 @@ export async function updateOrder(req, res) {
 
   // Duodama komanda generuoti dokumentus
 
-  if (payment_method === "debit") {
+  if (payment_method.value === "debit") {
     listTemplates = {
       contract: tool.group.templates.contract,
       invoice: tool.group.templates.invoice,

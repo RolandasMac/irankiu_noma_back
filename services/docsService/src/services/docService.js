@@ -113,6 +113,7 @@ function createOrderdata(data) {
     id: data.id,
     dateNow: new Date().toLocaleDateString("lv-LV"),
     clientName: data.client.name,
+    clientId: data.client.id,
     addres: data.client.addres,
     email: data.client.email,
     phone: data.client.phone,

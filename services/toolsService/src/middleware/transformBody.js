@@ -15,6 +15,10 @@ export async function transformBody(req, res, next) {
     ? new Date(req.body.rented_until)
     : null;
   req.body.group = req.body.group;
-  console.log(req.body);
+  req.body.required_addons =
+    typeof req.body.required_addons === "string" &&
+    req.body.required_addons !== ""
+      ? [req.body.required_addons]
+      : req.body.required_addons || [];
   next();
 }

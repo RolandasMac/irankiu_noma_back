@@ -49,7 +49,7 @@ const toolSchema = Joi.object({
   rented: Joi.boolean().optional().default(false),
   rented_until: Joi.date().optional().allow(null),
   group: Joi.string().required(),
-  required_addons: Joi.array().items(Joi.string()),
+  required_addons: Joi.array().items(Joi.string()).optional().allow(null),
 });
 
 // Pagrindinė schema pirmajai validacijai (be failų)
@@ -103,7 +103,7 @@ if (!fs.existsSync(imageUploadsDir)) {
 const storage = multer.memoryStorage();
 const upload = multer({
   storage,
-  limits: { fileSize: 1024 * 1024 * 5 }, // 5 MB limitas
+  limits: { fileSize: 1024 * 1024 * 10 }, // 5 MB limitas
   fileFilter: (req, file, cb) => {
     const allowed = /jpeg|jpg|png|gif/;
     const isValid =
@@ -113,6 +113,7 @@ const upload = multer({
     else cb(new Error("Leidžiami tik paveikslėliai (jpeg, jpg, png, gif)"));
   },
 });
+
 // -----------------
 router.get("/search", checkRole(["admin"]), searchTool);
 router.get("/", checkRole(["admin", "manager"]), listTools);

@@ -23,7 +23,10 @@ const orderSchema = Joi.object({
   discount: Joi.number().required(),
   pay_sum: Joi.number().required(),
   depozit: Joi.number().required(),
-  payment_method: Joi.string().required(),
+  payment_method: Joi.object({
+    label: Joi.string().required(),
+    value: Joi.string().required(),
+  }).required(),
   paid: Joi.boolean().required(),
   returned: Joi.boolean().required(),
   days: Joi.number().required(),
