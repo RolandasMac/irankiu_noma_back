@@ -35,7 +35,7 @@ const router = express.Router();
 
 const toolSchema = Joi.object({
   toolName: Joi.string().trim().min(1).required(),
-  signs: Joi.string().trim().min(1),
+  signs: Joi.string().trim().allow("", null).optional(),
   description: Joi.alternatives()
     .try(
       Joi.string().trim().min(1),
@@ -90,7 +90,7 @@ export const fullToolSchema = Joi.object({
 if (!fs.existsSync(imageUploadsDir)) {
   try {
     fs.mkdirSync(imageUploadsDir, { recursive: true });
-    console.log(`[Doc Service] Sukurtas įkėlimų katalogas: ${imageUploadsDir}`);
+    // console.log(`[Doc Service] Sukurtas įkėlimų katalogas: ${imageUploadsDir}`);
   } catch (mkdirErr) {
     console.error(
       `[Doc Service] Klaida kuriant įkėlimų katalogą '${imageUploadsDir}':`,
@@ -103,7 +103,7 @@ if (!fs.existsSync(imageUploadsDir)) {
 const storage = multer.memoryStorage();
 const upload = multer({
   storage,
-  limits: { fileSize: 1024 * 1024 * 10 }, // 5 MB limitas
+  limits: { fileSize: 1024 * 1024 * 10 },
   fileFilter: (req, file, cb) => {
     const allowed = /jpeg|jpg|png|gif/;
     const isValid =
@@ -150,7 +150,7 @@ router.post("/create-group", checkRole(["admin", "manager"]), createGroup);
 // CREATE – POST /addons
 // =========================
 router.post("/create-addon", async (req, res) => {
-  console.log("Gauta", req.body);
+  // console.log("Gauta", req.body);
   try {
     const addon = new Addon(req.body);
     await addon.save();

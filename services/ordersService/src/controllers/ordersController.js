@@ -1,13 +1,9 @@
 import Order from "../models/Order.js";
 import Counter from "../models/Counter.js";
-// import { sendOrderEvent } from "../events/sendOrderEvent.js";
-// import { publishOrderCreated } from "../rabbit/publisher.js";
 import { getClientById } from "../rabbit/getClientById.js";
 import { getToolById } from "../rabbit/getToolById.js";
 import { getDiscount } from "../rabbit/getDiscountByToolId.js";
 import { generateDocs } from "../rabbit/generateDocs.js";
-
-// test docNumGenerator
 import { getNextNumber } from "../utils/numberGenerator.js";
 export async function listOrders(req, res) {
   const page = Math.max(1, Number(req.query.page) || 1);
@@ -207,11 +203,7 @@ export async function createOrder(req, res) {
 }
 
 export async function updateOrder(req, res) {
-  // reikia pakeisti returned tool
   const { id } = req.params;
-  const updates1 = req.body;
-  // console.log("Updates", id, updates1);
-  // return;
   let {
     client_id,
     clientName,
@@ -231,12 +223,6 @@ export async function updateOrder(req, res) {
     addons_total,
     addons,
   } = req.body;
-  // let parsedPaymentMethod;
-  // try {
-  //   parsedPaymentMethod = JSON.parse(payment_method);
-  // } catch {
-  //   parsedPaymentMethod = { value: payment_method, label: payment_method };
-  // }
 
   const updates = {
     client_id,
@@ -256,61 +242,32 @@ export async function updateOrder(req, res) {
     addons_total,
     addons,
   };
-  // if (returned) {
-  //   const order = await Order.findByIdAndUpdate(id, updates, {
-  //     new: true,
-  //     runValidators: true,
-  //   });
-  //   console.log("order'is", order);
-  //   const tool = await getToolById(updates.tool_id, "update-tool", {
-  //     rented: true,
-  //     rented_until: date_until,
-  //   });
-  //   if (!order)
-  //     return res
-  //       .status(404)
-  //       .json({ success: false, message: "Order not found" });
-  //   return res
-  //     .status(201)
-  //     .json({ success: true, message: "Order updated", order });
-  // }
+
   const oldOrder = await Order.findById(id).lean();
   if (tool_id !== oldOrder.tool_id) {
     const updatedTool = await getToolById(oldOrder.tool_id, "update-tool", {
       rented: false,
       rented_until: null,
     });
-    // if (!updatedTool) console.log("Tool rented set to false");
   }
 
   const order = await Order.findByIdAndUpdate(id, updates, {
     new: true,
     runValidators: true,
   });
-  // console.log("order'is", order);
+
   if (!order)
     return res.status(404).json({ success: false, message: "Order not found" });
 
   // *******************************************************
-  // gauname kliento duomenis iš client servico
-  // console.log("Prieš klientą", updates.client_id);
   const client = await getClientById(updates.client_id);
-  // console.log("client", client);
-  // gauname tools duomenis iš tools serviso
-  // console.log("Prieš tools", updates.tool_id);
   const tool = await getToolById(updates.tool_id, "get-tool");
-  // console.log("tool", tool);
-  // gauname discounts duomenis iš discounts serviso
-  // console.log("Prieš discounts", updates.tool_id);
-  const discounts = await getDiscount(updates.tool_id, updates.days);
-  // console.log("discounts", discounts);
-  // Paskaičiuojame kainą
+  // const discounts = await getDiscount(updates.tool_id, updates.days);
 
   tool.rentPrice = parseFloat(
     (tool.rentPrice * (1 - updates.discount / 100)).toFixed(2)
   ).toFixed(2);
   const payment = updates.days * tool.rentPrice;
-  // console.log("payment", payment);
 
   const orderFullData = {
     id: order._id,
@@ -318,27 +275,21 @@ export async function updateOrder(req, res) {
     tool,
     days: updates.days,
     discount: updates.discount,
-    // payment,
     date: updates.date,
     date_until: updates.date_until,
     pay_sum: payment,
     payment_method,
     lang,
-    // pay_sum_words: updates.pay_sum_words,
     docNr: order.docNr,
     depozit,
     addons_total,
     addons,
   };
-  // console.log("orderFullData", orderFullData);
-
-  // Graziname registracijo numerius
-  // console.log("pries xxx", docNr);
-
-  for (const [key, value] of Object.entries(docNr)) {
-    const name = key.replace("Nr", ""); // pvz. "invoiceNr" → "invoice"
-
-    await returnNumberToCounter(name, String(value));
+  if (order.docNr && order.docNr.length > 0) {
+    for (const [key, value] of Object.entries(docNr)) {
+      const name = key.replace("Nr", "");
+      await returnNumberToCounter(name, String(value));
+    }
   }
 
   // ------------------------------------------
@@ -350,28 +301,13 @@ export async function updateOrder(req, res) {
     receiptNr:
       payment_method.value !== "debit" ? await getNextNumber("receipt") : "",
   };
-  // console.log("docNr", newDocNr);
   // ------------------------------------------
   orderFullData.docNr = newDocNr;
-  // console.log("orderFullData", orderFullData);
 
   // formuojame tempaltes
   let listTemplates = {};
-  // if (parsedPaymentMethod.value === "debit") {
-  //   listTemplates = {
-  //     contract: "Nomas ligums.docx",
-  //     invoice: "Rekins.docx",
-  //   };
-  // } else {
-  //   listTemplates = {
-  //     contract: "Nomas ligums.docx",
-  //     receipt: "Kvits.docx",
-  //     invoice: "Rekins.docx",
-  //   };
-  // }
 
   // Duodama komanda generuoti dokumentus
-
   if (payment_method.value === "debit") {
     listTemplates = {
       contract: tool.group.templates.contract,
@@ -385,10 +321,7 @@ export async function updateOrder(req, res) {
     };
   }
 
-  // console.log("Duodama komanda generuoti dokumentus");
   const docs = await generateDocs(orderFullData, listTemplates);
-  // console.log("docs", docs);
-
   const updatedOrder = await Order.findByIdAndUpdate(order._id, {
     docs_urls: docs,
     docNr: newDocNr,
@@ -406,29 +339,7 @@ export async function updateOrder(req, res) {
 export async function cancelOrder(req, res) {
   const { id } = req.params;
 
-  let {
-    client_id,
-    clientName,
-    tool_id,
-    toolName,
-    date,
-    date_until,
-    days,
-    discount,
-    pay_sum,
-    depozit,
-    payment_method,
-    lang,
-    docNr,
-    paid,
-    returned,
-  } = req.body;
-  // let parsedPaymentMethod;
-  // try {
-  //   parsedPaymentMethod = JSON.parse(payment_method);
-  // } catch {
-  //   parsedPaymentMethod = { value: payment_method, label: payment_method };
-  // }
+  let { tool_id, date_until, paid, returned } = req.body;
 
   const oldOrder = await Order.findById(id).lean();
   if (String(oldOrder.returned) !== String(returned) && returned === "true") {
@@ -498,8 +409,6 @@ export async function deleteOrder(req, res) {
   const order = await Order.findByIdAndDelete(id);
   if (!order)
     return res.status(404).json({ success: false, message: "Order not found" });
-
-  // console.log("order", order);
   // ------------------------------------------------------
   //  Ištrinto dokumento numerį įdedame atgal naudojimui
   // ------------------------------------------------------
@@ -533,7 +442,6 @@ export async function deleteOrder(req, res) {
 export async function test(req, res) {
   const { type, num } = req.body;
   let number = 25;
-
   // Įdeda numerį į eilę sekančiam suteikimui
   if (num) {
     const year = new Date().getFullYear();
@@ -542,25 +450,14 @@ export async function test(req, res) {
       { $push: { availableNumbers: { $each: [num], $sort: 1 } } }
     );
   }
-
   // Duoda sekantį prieinamą numerį
   number = await getNextNumber(type);
-
-  // console.log("number", number);
-
   res.json({
     success: true,
     message: "OrdersService test endpoint work well!",
     number,
   });
 }
-
-/**
- * Ištrina numerį iš DB ir grąžina jo skaičių į Counter.availableNumbers
- * Pvz. "CON-2025-004" -> 4
- * @param {string} type - dokumento tipas ("contract", "invoice", "receipt" ir t.t.)
- * @param {string} docNumber - pilnas numeris, pvz. "CON-2025-004"
- */
 export async function returnNumberToCounter(type, docNumber) {
   if (!docNumber || typeof docNumber !== "string") return;
 
@@ -580,6 +477,4 @@ export async function returnNumberToCounter(type, docNumber) {
     { id: `${type}_${year}` },
     { $push: { availableNumbers: { $each: [num], $sort: 1 } } }
   );
-
-  // console.log(`✅ Numeris ${num} (${docNumber}) grąžintas į ${type}_${year}`);
 }

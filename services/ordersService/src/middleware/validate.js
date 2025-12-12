@@ -8,7 +8,7 @@ export function validateBody(schema) {
     });
 
     if (error) {
-      console.log(error.details);
+      // console.log(error.details);
       return res.status(400).json({
         success: false,
         message: "Validation error",

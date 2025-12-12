@@ -11,6 +11,9 @@ import {
   cancelOrder,
 } from "../controllers/ordersController.js";
 import { checkRole } from "../middleware/checkRole.js";
+import { deleteOldDocs } from "../middleware/deleteOldDocs.js";
+import { testMiddleware } from "../middleware/testMiddleware.js";
+
 const router = express.Router();
 
 const orderSchema = Joi.object({
@@ -31,16 +34,12 @@ const orderSchema = Joi.object({
   returned: Joi.boolean().required(),
   days: Joi.number().required(),
   lang: Joi.string().required(),
-
-  // ✅ docNr kaip neprivalomas objektas:
   docNr: Joi.object({
     contractNr: Joi.string().allow("").optional(),
     invoiceNr: Joi.string().allow("").optional(),
     receiptNr: Joi.string().allow("").optional(),
   }).optional(),
-
   addons_total: Joi.number().required(),
-
   addons: Joi.array()
     .items(
       Joi.object({
@@ -66,15 +65,17 @@ router.put(
   "/:id",
   checkRole(["admin", "manager"]),
   validateBody(orderSchema),
+  deleteOldDocs,
   updateOrder
 );
 router.put(
   "/cancel-order/:id",
   checkRole(["admin", "manager"]),
   // validateBody(orderSchema),
+  // testMiddleware,
   cancelOrder
 );
-router.delete("/:id", checkRole(["admin"]), deleteOrder);
+router.delete("/:id", checkRole(["admin"]), deleteOldDocs, deleteOrder);
 router.post("/test", checkRole(["admin", "manager"]), test);
 
 export default router;

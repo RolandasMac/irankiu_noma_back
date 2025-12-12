@@ -1,6 +1,6 @@
 export async function transformBody(req, res, next) {
   req.body.toolName = req.body.toolName || "";
-  req.body.signs = req.body.signs || [""];
+  req.body.signs = req.body.signs || "";
   req.body.description = req.body.description || [];
   req.body.images_urls = req.body.images_urls || [];
   req.body.toolPrice = req.body.toolPrice
