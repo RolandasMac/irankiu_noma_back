@@ -296,12 +296,12 @@ app.use("/docs-public", ...setupProxy(DOCSPORT, "docs-public", false));
 // =======================================================
 //  SERVER START
 // =======================================================
-app.listen(PORT, () => {
-  console.log(`✅ Proxy Started at: ${BACKHOST}:${PORT}`);
-});
-
-// Jei reikėtų HTTPS (kai turėsi sertifikatus)
-// const httpsServer = https.createServer(credentials, app);
-// httpsServer.listen(PORT, () => {
+// app.listen(PORT, () => {
 //   console.log(`✅ Proxy Started at: ${BACKHOST}:${PORT}`);
 // });
+
+// Jei reikėtų HTTPS (kai turėsi sertifikatus)
+const httpsServer = https.createServer(credentials, app);
+httpsServer.listen(PORT, () => {
+  console.log(`✅ Proxy Started at: ${BACKHOST}:${PORT}`);
+});
