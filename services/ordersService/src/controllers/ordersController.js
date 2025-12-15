@@ -416,8 +416,12 @@ export async function deleteOrder(req, res) {
   let message = "";
   if ((contractNr, invoiceNr, receiptNr)) {
     await returnNumberToCounter("receipt", receiptNr);
+    await returnNumberToCounter("invoice", invoiceNr);
+    await returnNumberToCounter("contract", contractNr);
     message = "Order deleted and numbers returned to counters";
   } else {
+    await returnNumberToCounter("invoice", invoiceNr);
+    await returnNumberToCounter("contract", contractNr);
     message = "Order deleted";
   }
 
