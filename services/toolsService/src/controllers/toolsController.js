@@ -321,13 +321,93 @@ export async function getTemplates(req, res) {
   res.json({ success: true, files });
 }
 
+// ✅ CREATE
 export async function createGroup(req, res) {
-  const { group, templates } = req.body;
-  if (!group || !templates)
-    return res.status(400).json({ success: false, message: "Trūksta duomenų" });
+  try {
+    const { group, templates } = req.body;
 
-  const newGroup = await Group.create({ group, templates });
-  res.json({ success: true, group: newGroup });
+    if (!group || !templates) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Trūksta duomenų" });
+    }
+
+    const exists = await Group.findOne({ group });
+    if (exists) {
+      return res
+        .status(409)
+        .json({ success: false, message: "Grupė jau egzistuoja" });
+    }
+
+    const newGroup = await Group.create({ group, templates });
+
+    res.status(201).json({ success: true, group: newGroup });
+  } catch (err) {
+    res.status(500).json({ success: false, message: "Klaida kuriant grupę" });
+  }
+}
+
+// 📥 READ ALL
+export async function getGroups(req, res) {
+  try {
+    const groups = await Group.find().sort({ createdAt: -1 });
+    res.json({ success: true, groups });
+  } catch (err) {
+    res.status(500).json({ success: false, message: "Klaida gaunant grupes" });
+  }
+}
+
+// 📄 READ ONE
+export async function getGroupById(req, res) {
+  try {
+    const group = await Group.findById(req.params.id);
+
+    if (!group) {
+      return res.status(404).json({ success: false, message: "Grupė nerasta" });
+    }
+
+    res.json({ success: true, group });
+  } catch (err) {
+    res.status(400).json({ success: false, message: "Neteisingas ID" });
+  }
+}
+
+// ✏️ UPDATE
+export async function updateGroup(req, res) {
+  try {
+    const { group, templates } = req.body;
+
+    const updated = await Group.findByIdAndUpdate(
+      req.params.id,
+      { group, templates },
+      { new: true, runValidators: true }
+    );
+
+    if (!updated) {
+      return res.status(404).json({ success: false, message: "Grupė nerasta" });
+    }
+
+    res.json({ success: true, group: updated });
+  } catch (err) {
+    res
+      .status(500)
+      .json({ success: false, message: "Klaida atnaujinant grupę" });
+  }
+}
+
+// 🗑 DELETE
+export async function deleteGroup(req, res) {
+  try {
+    const deleted = await Group.findByIdAndDelete(req.params.id);
+
+    if (!deleted) {
+      return res.status(404).json({ success: false, message: "Grupė nerasta" });
+    }
+
+    res.json({ success: true, message: "Grupė ištrinta" });
+  } catch (err) {
+    res.status(500).json({ success: false, message: "Klaida trinant grupę" });
+  }
 }
 
 // --------------------------------------------------------------------------------------

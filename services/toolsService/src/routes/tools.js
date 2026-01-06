@@ -12,8 +12,12 @@ import {
   searchTool,
   listGroups,
   getTemplates,
-  createGroup,
   listFreeToolsForEdit,
+  createGroup,
+  getGroups,
+  getGroupById,
+  updateGroup,
+  deleteGroup,
 } from "../controllers/toolsController.js";
 import multer from "multer";
 import path from "path";
@@ -144,7 +148,21 @@ router.put(
 );
 router.get("/get-groups", checkRole(["admin", "manager"]), listGroups);
 router.get("/get-templates", checkRole(["admin", "manager"]), getTemplates);
+
+// CREATE
 router.post("/create-group", checkRole(["admin", "manager"]), createGroup);
+
+// READ ALL
+router.get("/groups", checkRole(["admin", "manager"]), getGroups);
+
+// READ ONE
+router.get("/groups/:id", checkRole(["admin", "manager"]), getGroupById);
+
+// UPDATE
+router.put("/groups/:id", checkRole(["admin", "manager"]), updateGroup);
+
+// DELETE
+router.delete("/groups/:id", checkRole(["admin", "manager"]), deleteGroup);
 
 // =========================
 // CREATE – POST /addons
