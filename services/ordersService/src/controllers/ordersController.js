@@ -285,9 +285,11 @@ export async function updateOrder(req, res) {
     addons_total,
     addons,
   };
-  if (order.docNr && order.docNr.length > 0) {
-    for (const [key, value] of Object.entries(docNr)) {
+  console.log("Iki Pries numeriu grazinima", order.docNr, order.docNr.length);
+  if (order.docNr && Object.keys(order.docNr).length > 0) {
+    for (const [key, value] of Object.entries(order.docNr)) {
       const name = key.replace("Nr", "");
+      console.log("Pries numeriu grazinima");
       await returnNumberToCounter(name, String(value));
     }
   }
@@ -414,7 +416,7 @@ export async function deleteOrder(req, res) {
   // ------------------------------------------------------
   const { contractNr, invoiceNr, receiptNr } = order.docNr;
   let message = "";
-  if ((contractNr, invoiceNr, receiptNr)) {
+  if (receiptNr) {
     await returnNumberToCounter("receipt", receiptNr);
     message = "Order deleted and numbers returned to counters";
   } else {
@@ -472,7 +474,7 @@ export async function returnNumberToCounter(type, docNumber) {
 
   // 3️⃣ Grąžinam jį į Counter.availableNumbers
   const year = new Date().getFullYear();
-
+  console.log("Pries numeriu grazinima i DB");
   await Counter.updateOne(
     { id: `${type}_${year}` },
     { $push: { availableNumbers: { $each: [num], $sort: 1 } } }
