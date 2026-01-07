@@ -285,8 +285,9 @@ export async function updateOrder(req, res) {
     addons_total,
     addons,
   };
-  if (order.docNr && order.docNr.length > 0) {
-    for (const [key, value] of Object.entries(docNr)) {
+
+  if (order.docNr && Object.keys(order.docNr).length > 0) {
+    for (const [key, value] of Object.entries(order.docNr)) {
       const name = key.replace("Nr", "");
       await returnNumberToCounter(name, String(value));
     }
@@ -414,7 +415,7 @@ export async function deleteOrder(req, res) {
   // ------------------------------------------------------
   const { contractNr, invoiceNr, receiptNr } = order.docNr;
   let message = "";
-  if ((contractNr, invoiceNr, receiptNr)) {
+  if (receiptNr) {
     await returnNumberToCounter("receipt", receiptNr);
     await returnNumberToCounter("invoice", invoiceNr);
     await returnNumberToCounter("contract", contractNr);
@@ -476,7 +477,6 @@ export async function returnNumberToCounter(type, docNumber) {
 
   // 3️⃣ Grąžinam jį į Counter.availableNumbers
   const year = new Date().getFullYear();
-
   await Counter.updateOne(
     { id: `${type}_${year}` },
     { $push: { availableNumbers: { $each: [num], $sort: 1 } } }

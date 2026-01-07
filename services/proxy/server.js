@@ -238,6 +238,7 @@ function setupProxy(port, routePrefix, requiresAuth = false) {
       target: `http://${BACKHOST}:${port}`,
       changeOrigin: true,
       cookieDomainRewrite: false,
+      onProxyReq: fixRequestBody, // 🔥 BŪTINA multipart!
     })
   );
 

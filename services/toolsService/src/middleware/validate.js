@@ -1,6 +1,7 @@
 import Joi from "joi";
 
 export function validateBody(schema) {
+  console.log("validateBody");
   return (req, res, next) => {
     const { error, value } = schema.validate(req.body, {
       abortEarly: false,

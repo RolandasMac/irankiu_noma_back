@@ -109,12 +109,15 @@ const upload = multer({
   storage,
   limits: { fileSize: 1024 * 1024 * 10 },
   fileFilter: (req, file, cb) => {
-    const allowed = /jpeg|jpg|png|gif/;
+    const allowed = /jpeg|jpg|png|gif|pdf/;
     const isValid =
       allowed.test(file.mimetype) &&
       allowed.test(path.extname(file.originalname).toLowerCase());
     if (isValid) cb(null, true);
-    else cb(new Error("Leidžiami tik paveikslėliai (jpeg, jpg, png, gif)"));
+    else
+      cb(
+        new Error("Leidžiami tik paveikslėliai (jpeg, jpg, png, gif) ir pdf.")
+      );
   },
 });
 
@@ -129,8 +132,15 @@ router.get(
 );
 router.post(
   "/",
+  // (req, res, next) => {
+  //   console.log("Pirmas next"), next();
+  // },
   checkRole(["admin"]),
-  upload.array("images"),
+  // upload.array("images"),
+  upload.fields([
+    { name: "images", maxCount: 10 },
+    { name: "manual", maxCount: 10 },
+  ]),
   transformBody, //reikalingas tam, kad galima butu validuoti, ir tik po to saugoti failus.
   validateBody(toolSchema),
   saveFiles,
