@@ -23,6 +23,7 @@ export const tools = {
   rentPrice: { type: Number, required: true },
   group: { type: String, required: true },
   required_addons: { type: [String], required: false },
+  manuals_urls: { type: [String], required: false },
 };
 export const orders = {
   client_id: { type: String, required: true },

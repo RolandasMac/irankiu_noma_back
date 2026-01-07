@@ -143,6 +143,7 @@ export async function getTool(req, res) {
 }
 
 export async function createTool(req, res) {
+  console.log("createTool");
   let {
     toolName,
     description,
@@ -155,6 +156,7 @@ export async function createTool(req, res) {
     images_urls,
     group,
     required_addons,
+    manuals_urls,
   } = req.body;
   if (
     !toolName ||
@@ -184,6 +186,7 @@ export async function createTool(req, res) {
     rented_until,
     group,
     required_addons,
+    manuals_urls,
   });
   await tool.save();
 
