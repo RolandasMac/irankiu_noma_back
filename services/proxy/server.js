@@ -22,7 +22,7 @@ import axios from "axios";
 import { fileURLToPath } from "url";
 import paths from "../../config/paths.js"; // tavo failas su direktorijomis
 
-const { imageUploadsDir } = paths;
+const { imageUploadsDir, toolManualsDir } = paths;
 
 // =======================================================
 //  SSL Sertifikatai
@@ -252,6 +252,7 @@ const allowlist = [
   /^\/auth-public\/login$/,
   /^\/auth-public\/sendemailcode$/,
   /^\/auth-public\/createuser$/,
+  /^\/tools-public\/manuals(\/.*)?$/,
 ];
 
 // Tikrinimas prieš public maršrutus
@@ -261,7 +262,7 @@ app.use((req, res, next) => {
   if (isAllowed) return next();
   return res.status(403).json({
     success: false,
-    message: "Šis veiksmas leidžiamas tik autorizuotam vartotojui!",
+    message: "Šis veiksmas leidžiamas tik autorizuotam vartotojui!!!",
   });
 });
 
@@ -269,7 +270,7 @@ app.use((req, res, next) => {
 //  STATIC FILES
 // =======================================================
 app.use("/imageUploads/", express.static(imageUploadsDir));
-
+app.use("/manuals", express.static(toolManualsDir));
 // =======================================================
 //  PROXY MARŠRUTAI
 // =======================================================

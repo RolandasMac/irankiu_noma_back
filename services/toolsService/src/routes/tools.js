@@ -2,6 +2,7 @@ import express from "express";
 import Joi from "joi";
 import { validateBody } from "../middleware/validate.js";
 import { transformBody } from "../middleware/transformBody.js";
+import { createThumbnailsMiddleware } from "../middleware/createThumbnail.js";
 import {
   listTools,
   getTool,
@@ -97,7 +98,7 @@ if (!fs.existsSync(imageUploadsDir)) {
     // console.log(`[Doc Service] Sukurtas įkėlimų katalogas: ${imageUploadsDir}`);
   } catch (mkdirErr) {
     console.error(
-      `[Doc Service] Klaida kuriant įkėlimų katalogą '${imageUploadsDir}':`,
+      `[Tool Service] Klaida kuriant įkėlimų katalogą '${imageUploadsDir}':`,
       mkdirErr
     );
     // Throw klaidą globaliai
@@ -139,8 +140,9 @@ router.post(
   // upload.array("images"),
   upload.fields([
     { name: "images", maxCount: 10 },
-    { name: "manual", maxCount: 10 },
+    { name: "manual", maxCount: 1 },
   ]),
+  createThumbnailsMiddleware,
   transformBody, //reikalingas tam, kad galima butu validuoti, ir tik po to saugoti failus.
   validateBody(toolSchema),
   saveFiles,
