@@ -5,7 +5,7 @@ import toolsRoutes from "./routes/tools.js";
 import { notFoundHandler, errorHandler } from "./middleware/errorHandler.js";
 import paths from "../../../config/paths.js";
 
-const { imageUploadsDir } = paths;
+const { imageUploadsDir, thumbnailsDir, toolManualsDir } = paths;
 
 export function createApp() {
   const app = express();
@@ -16,6 +16,8 @@ export function createApp() {
 
   app.use("/", toolsRoutes);
   app.use("/imageUploads", express.static(imageUploadsDir));
+  app.use("/thumbnails", express.static(thumbnailsDir));
+  app.use("/manuals", express.static(toolManualsDir));
   app.use(notFoundHandler);
   app.use(errorHandler);
 

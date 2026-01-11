@@ -12,12 +12,14 @@ const imageUploadsDir = path.join(storeRoot, "imageUploads");
 const templatesDir = path.join(storeRoot, "templates");
 const generatedDir = path.join(storeRoot, "generated");
 const toolManualsDir = path.join(storeRoot, "manuals");
+const thumbnailsDir = path.join(storeRoot, "thumbnails");
 
 export default {
   imageUploadsDir,
   templatesDir,
   generatedDir,
   toolManualsDir,
+  thumbnailsDir,
 };
 
 for (const dir of [
@@ -25,6 +27,7 @@ for (const dir of [
   templatesDir,
   generatedDir,
   toolManualsDir,
+  thumbnailsDir,
 ]) {
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 }

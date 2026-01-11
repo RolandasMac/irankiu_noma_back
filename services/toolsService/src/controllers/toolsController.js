@@ -156,7 +156,8 @@ export async function createTool(req, res) {
     images_urls,
     group,
     required_addons,
-    manuals_urls,
+    manual_url,
+    manualThumbnail_url,
   } = req.body;
   if (
     !toolName ||
@@ -186,7 +187,8 @@ export async function createTool(req, res) {
     rented_until,
     group,
     required_addons,
-    manuals_urls,
+    manual_url,
+    manualThumbnail_url,
   });
   await tool.save();
 

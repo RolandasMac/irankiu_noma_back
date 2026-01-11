@@ -2,15 +2,66 @@ import fs from "fs";
 import path from "path";
 import PizZip from "pizzip";
 import Docxtemplater from "docxtemplater";
-import libre from "libreoffice-convert";
+// import libre from "libreoffice-convert";
 import paths from "../../../../config/paths.js";
 import { numberToWords, locales } from "./../utils/numberToWords.js";
+import ImageModule from "docxtemplater-image-module-free";
+import QRCode from "qrcode";
+import dotenv from "dotenv";
+import { fileURLToPath } from "url";
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+dotenv.config({ path: path.resolve(__dirname, "../../../../.env") });
+
+const MANUALS_BASE_URL = process.env.MANUALS_BASE_URL;
+export async function generateQrBase64(url) {
+  const buffer = await QRCode.toBuffer(url, {
+    width: 300,
+    errorCorrectionLevel: "H",
+  });
+
+  return buffer.toString("base64");
+}
+// const tagValue = generateQrBase64("gaidysyravisdagaidys")
+// const imageModule = new ImageModule({
+//   centered: false,
+//   getImage: function (tagValue) {
+//     // tagValue === base64 string
+//     return Buffer.from(tagValue, "base64");
+//   },
+//   getSize: function () {
+//     return [200, 200]; // plotis, aukštis (px)
+//   },
+// });
+function createImageModule() {
+  return new ImageModule({
+    centered: false,
+    getImage(tagValue) {
+      return Buffer.from(tagValue, "base64");
+    },
+    getSize() {
+      return [200, 200];
+    },
+  });
+}
 const { templatesDir, generatedDir } = paths;
 export async function generateFromTemplate(order, newTemplates) {
   if (!fs.existsSync(generatedDir)) fs.mkdirSync(generatedDir);
   const results = [];
-  const createdData = createOrderdata(order);
+
+  // ⬇️ GENERUOJAM QR
+  const qrBase64 = await generateQrBase64(
+    `${MANUALS_BASE_URL}/${order.tool.manual_url}`
+  );
+
+  const createdData = {
+    ...createOrderdata(order),
+    qr: qrBase64, // 👈 SVARBIAUSIA
+  };
+
+  // const createdData = createOrderdata(order);
+
   for (const [type, templateName] of Object.entries(newTemplates)) {
     const templatePath = path.join(templatesDir, templateName);
     const content = fs.readFileSync(templatePath, "binary");
@@ -18,6 +69,7 @@ export async function generateFromTemplate(order, newTemplates) {
     const doc = new Docxtemplater(zip, {
       paragraphLoop: true,
       linebreaks: true,
+      modules: [createImageModule()],
     });
     doc.render(createdData);
     const buf = doc.getZip().generate({ type: "nodebuffer" });
@@ -34,7 +86,7 @@ function createOrderdata(data) {
   const locale = locales[data.lang];
   const totallSum = data.pay_sum + data.addons_total + data.depozit;
   const pay_sum_words = numberToWords(totallSum, locale);
-  // kuriame sąliginį laukelų, jeigu priedas egzistuoja
+  // kuriame sąliginį laukelį, jeigu priedas egzistuoja
   const has_addons = data.addons.length > 0;
   const addons_withtotal = data.addons.map((addon) => {
     return {
