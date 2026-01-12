@@ -34,17 +34,55 @@ export async function generateQrBase64(url) {
 //     return [200, 200]; // plotis, aukštis (px)
 //   },
 // });
+// function createImageModule() {
+//   return new ImageModule({
+//     centered: false,
+//     getImage(tagValue) {
+//       return Buffer.from(tagValue, "base64");
+//     },
+//     getSize() {
+//       return [200, 200];
+//     },
+//   });
+// }
 function createImageModule() {
   return new ImageModule({
     centered: false,
+
     getImage(tagValue) {
       return Buffer.from(tagValue, "base64");
     },
+
     getSize() {
-      return [200, 200];
+      return [150, 150];
+    },
+
+    getProps() {
+      return {
+        floating: {
+          // 📌 Pozicija nuo PUSLAPIO
+          horizontalPosition: {
+            relative: "page",
+            align: "right",
+          },
+
+          verticalPosition: {
+            relative: "page",
+            offset: 40, // 👈 atstumas nuo viršaus (px)
+          },
+
+          wrap: {
+            type: "square",
+          },
+
+          // 🔥 SVARBIAUSIA DALIS
+          zIndex: 10, // QR VISADA VIRŠ TEKSTO
+        },
+      };
     },
   });
 }
+
 const { templatesDir, generatedDir } = paths;
 export async function generateFromTemplate(order, newTemplates) {
   if (!fs.existsSync(generatedDir)) fs.mkdirSync(generatedDir);

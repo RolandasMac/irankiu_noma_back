@@ -2,7 +2,10 @@ import express from "express";
 import Joi from "joi";
 import { validateBody } from "../middleware/validate.js";
 import { transformBody } from "../middleware/transformBody.js";
-import { createThumbnailsMiddleware } from "../middleware/createThumbnail.js";
+import {
+  createThumbnailsMiddleware,
+  updateThumbnailsMiddleware,
+} from "../middleware/createThumbnail.js";
 import {
   listTools,
   getTool,
@@ -133,17 +136,13 @@ router.get(
 );
 router.post(
   "/",
-  // (req, res, next) => {
-  //   console.log("Pirmas next"), next();
-  // },
   checkRole(["admin"]),
-  // upload.array("images"),
   upload.fields([
     { name: "images", maxCount: 10 },
     { name: "manual", maxCount: 1 },
   ]),
   createThumbnailsMiddleware,
-  transformBody, //reikalingas tam, kad galima butu validuoti, ir tik po to saugoti failus.
+  transformBody,
   validateBody(toolSchema),
   saveFiles,
   createTool
@@ -151,12 +150,21 @@ router.post(
 router.put(
   "/:id",
   checkRole(["admin"]),
-  upload.array("images"),
-  transformUpdateBody, // 2. Transformuoti body
-  validateBeforeUpload(basicToolSchema), // 3. Validacija prieš failų išsaugojimą
-  saveUpdatedFiles, // 4. Išsaugoti failus (tik jei validacija pavyko)
-  validateBody(fullToolSchema), // 5. Galutinė validacija su failais
-  updateTool // 6. Atnaujinti įrašą
+  // upload.array("images"),
+  upload.fields([
+    { name: "images", maxCount: 10 },
+    { name: "manual", maxCount: 1 },
+  ]),
+  //reikia pataisyti!!!!!!!!!!
+  updateThumbnailsMiddleware,
+
+  transformUpdateBody,
+  validateBeforeUpload(basicToolSchema),
+
+  // Reikia pataisyti!!!!!!!!!!
+  saveUpdatedFiles,
+  validateBody(fullToolSchema),
+  updateTool
 );
 router.get("/get-groups", checkRole(["admin", "manager"]), listGroups);
 router.get("/get-templates", checkRole(["admin", "manager"]), getTemplates);

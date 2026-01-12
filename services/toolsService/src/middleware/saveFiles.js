@@ -25,11 +25,16 @@ export async function saveFiles(req, res, next) {
     req.body.images_urls = [...imageUrls];
 
     // save manuals
+
+    if (!req.files.manual) {
+      return next();
+    }
+
     if (!fs.existsSync(toolManualsDir)) {
       fs.mkdirSync(toolManualsDir, { recursive: true });
     }
 
-    if (req.files.manual.length > 0) {
+    if (req.files.manual && req.files.manual.length > 0) {
       const manualFile = req.files.manual[0];
       const manualFilename = Date.now() + "-" + manualFile.originalname;
       const manualFilepath = path.join(toolManualsDir, manualFilename);
