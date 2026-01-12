@@ -165,93 +165,80 @@ export const createThumbnailsArrayMiddleware = async (req, res, next) => {
   });
 };
 export const createThumbnailsMiddleware = async (req, res, next) => {
-  console.log("Čia veikia");
-  if (!req.files.manual) {
+  console.log("Čia veikia", req.files.manual.length);
+  if (req.files.manual.length === 0) {
     console.log("update thiumbnails neveikia!!! Neatsiųstas joks failas");
     return next();
   }
 
   try {
-    const originalFileName = req.files.manual[0].originalname;
-    let finalThumbnailFileName;
-    let tempPdfPath = null;
-    let tempImagePath = null;
-    let thumbnailBuffer = null;
-    if (req.files.manual[0].mimetype === "application/pdf") {
-      // Laikinas failo prefiksas
-      const pdfBuffer = req.files.manual[0].buffer;
-      tempPdfPath = path.join(os.tmpdir(), `upload-${Date.now()}.pdf`);
-      fs.writeFileSync(tempPdfPath, pdfBuffer);
+    req.thumbnailsData = [];
+    for (const file of req.files.manual) {
+      console.log("forEach");
+      const originalFileName = file.originalname;
+      let finalThumbnailFileName;
+      let tempPdfPath = null;
+      let tempImagePath = null;
+      let thumbnailBuffer = null;
+      if (file.mimetype === "application/pdf") {
+        // Laikinas failo prefiksas
+        const pdfBuffer = file.buffer;
+        tempPdfPath = path.join(os.tmpdir(), `upload-${Date.now()}.pdf`);
+        fs.writeFileSync(tempPdfPath, pdfBuffer);
 
-      // Konvertuojame pirmą puslapį į JPEG su Poppler
-      finalThumbnailFileName = `thumb-${Date.now()}-${originalFileName.replace(
-        /\.[^/.]+$/,
-        ""
-      )}.jpg`;
-      const tempOutBase = path.join(os.tmpdir(), finalThumbnailFileName);
-      await poppler.pdfToCairo(tempPdfPath, tempOutBase, {
-        jpegFile: true,
-        firstPageToConvert: 1,
-        lastPageToConvert: 1,
-      });
-      // node-poppler sukuria `tempOutPath-1.jpg`
-      tempImagePath = `${tempOutBase}-1.jpg`;
+        // Konvertuojame pirmą puslapį į JPEG su Poppler
+        finalThumbnailFileName = `thumb-${Date.now()}-${originalFileName.replace(
+          /\.[^/.]+$/,
+          ""
+        )}.jpg`;
+        const tempOutBase = path.join(os.tmpdir(), finalThumbnailFileName);
+        await poppler.pdfToCairo(tempPdfPath, tempOutBase, {
+          jpegFile: true,
+          firstPageToConvert: 1,
+          lastPageToConvert: 1,
+        });
+        // node-poppler sukuria `tempOutPath-1.jpg`
+        tempImagePath = `${tempOutBase}-1.jpg`;
 
-      if (!fs.existsSync(tempImagePath)) {
-        throw new Error(
-          `Nepavyko sugeneruoti pirmo PDF puslapio: ${tempImagePath}`
-        );
+        if (!fs.existsSync(tempImagePath)) {
+          throw new Error(
+            `Nepavyko sugeneruoti pirmo PDF puslapio: ${tempImagePath}`
+          );
+        }
+
+        // Resize su Sharp
+        thumbnailBuffer = await sharp(tempImagePath)
+          .resize(200, 200, {
+            fit: sharp.fit.inside,
+            withoutEnlargement: true,
+          })
+          .toFormat("jpeg", { quality: 80 })
+          // .toFile(thumbnailFilePath);
+          .toBuffer();
+
+        console.log(`PDF įkeltas: ${finalThumbnailFileName}`);
+      } else {
+        throw new Error("Netikėtas failo tipas, kurio neapdorojo serveris.");
       }
 
-      // Normalizuojame miniatiūros pavadinimą
-      // finalThumbnailFileName = `thumb-${Date.now()}-${originalFileName.replace(
-      //   /\.[^/.]+$/,
-      //   ""
-      // )}.jpg`;
-      // thumbnailFilePath = path.join(thumbnailsDir, finalThumbnailFileName);
+      // Ištriname laikiną failą (jeigu buvo sukurtas PDF konvertavimo metu)
+      if (tempImagePath && fs.existsSync(tempImagePath)) {
+        fs.unlinkSync(tempPdfPath);
+        fs.unlinkSync(tempImagePath);
+        console.log(`Laikinas failas ištrintas: ${tempImagePath}`);
+      }
 
-      // Resize su Sharp
-      thumbnailBuffer = await sharp(tempImagePath)
-        .resize(200, 200, {
-          fit: sharp.fit.inside,
-          withoutEnlargement: true,
-        })
-        .toFormat("jpeg", { quality: 80 })
-        // .toFile(thumbnailFilePath);
-        .toBuffer();
-
-      // console.log(`PDF įkeltas: ${originalFileName}`);
-      // console.log(`PDF miniatiūra sugeneruota: ${finalThumbnailFileName}`);
-      console.log(`PDF įkeltas: ${finalThumbnailFileName}`);
-    } else {
-      throw new Error("Netikėtas failo tipas, kurio neapdorojo serveris.");
+      req.thumbnailsData.push({
+        fieldname: "thumbnail",
+        thumbnailName: finalThumbnailFileName,
+        originalname: originalFileName,
+        encoding: "7bit",
+        mimetype: "image/jpeg",
+        buffer: thumbnailBuffer,
+        size: thumbnailBuffer.length,
+      });
     }
-
-    // Ištriname laikiną failą (jeigu buvo sukurtas PDF konvertavimo metu)
-    if (tempImagePath && fs.existsSync(tempImagePath)) {
-      fs.unlinkSync(tempPdfPath);
-      fs.unlinkSync(tempImagePath);
-      console.log(`Laikinas failas ištrintas: ${tempImagePath}`);
-    }
-
-    // const thumbnailsData = {
-    //   originalUrl: `/${toolManualsDir}/${originalFileName}`,
-    //   thumbnailUrl: thumbnailFilePath,
-    //   originalFileName,
-    //   thumbnailFileName: finalThumbnailFileName,
-    // };
-
-    // req.body.manual_url = thumbnailsData.originalUrl;
-    // req.body.manualThumbnail_url = thumbnailFilePath;
-
-    req.thumbnailsData = {
-      fieldname: "thumbnail",
-      originalname: finalThumbnailFileName,
-      encoding: "7bit",
-      mimetype: "image/jpeg",
-      buffer: thumbnailBuffer,
-      size: thumbnailBuffer.length,
-    };
+    console.log("Čia veikia middleware", req.thumbnailsData);
     return next();
   } catch (error) {
     console.error(

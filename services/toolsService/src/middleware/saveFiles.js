@@ -34,31 +34,41 @@ export async function saveFiles(req, res, next) {
       fs.mkdirSync(toolManualsDir, { recursive: true });
     }
 
-    if (req.files.manual && req.files.manual.length > 0) {
-      const manualFile = req.files.manual[0];
-      const manualFilename = Date.now() + "-" + manualFile.originalname;
-      const manualFilepath = path.join(toolManualsDir, manualFilename);
-      req.body.manual_url = manualFilename;
-      fs.writeFileSync(manualFilepath, manualFile.buffer);
-    }
+    if (
+      req.files.manual &&
+      req.files.manual.length > 0 &&
+      req.thumbnailsData.length === req.files.manual.length
+    ) {
+      req.body.manuals_urls = [];
+      req.files.manual.forEach((manual) => {
+        // const manualFile = manual;
+        const manualFilename = Date.now() + "-" + manual.originalname;
+        const manualFilepath = path.join(toolManualsDir, manualFilename);
+        const manual_url = {
+          manualFilename: manualFilename,
+          thumbnailFilename: null,
+        };
+        fs.writeFileSync(manualFilepath, manual.buffer);
 
-    if (req.thumbnailsData) {
-      //
-      //  req.thumbnailsData = {
-      //       fieldname: "thumbnail",
-      //       originalname: finalThumbnailFileName,
-      //       encoding: "7bit",
-      //       mimetype: "image/jpeg",
-      //       buffer: thumbnailBuffer,
-      //       size: thumbnailBuffer.length,
-      //     };
+        const thumbnail = req.thumbnailsData.find(
+          (thumbnail) => thumbnail.originalname === manual.originalname
+        );
+        const thumbnailFile = thumbnail.buffer;
+        const thumbnailFilename = thumbnail.thumbnailName;
+        const thumbnailFilepath = path.join(thumbnailsDir, thumbnailFilename);
 
-      const thumbnailFile = req.thumbnailsData.buffer;
-      const thumbnailFilename = req.thumbnailsData.originalname;
-      const thumbnailFilepath = path.join(thumbnailsDir, thumbnailFilename);
-
-      req.body.manualThumbnail_url = thumbnailFilename;
-      fs.writeFileSync(thumbnailFilepath, thumbnailFile);
+        manual_url.thumbnailFilename = thumbnailFilename;
+        fs.writeFileSync(thumbnailFilepath, thumbnailFile);
+        req.body.manuals_urls.push(manual_url);
+      });
+    } else {
+      console.log(
+        "Nepavyko issaugoti manual",
+        req.thumbnailsData.length,
+        req.files.manual.length,
+        req.thumbnailsData
+      );
+      throw new Error("Nepavyko issaugoti manual");
     }
 
     // req.body.manuals_urls = [...manualsUrls];
