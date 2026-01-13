@@ -11,9 +11,6 @@ export async function saveFiles(req, res, next) {
     req.thumbnailsData
   );
   try {
-    if (!fs.existsSync(imageUploadsDir)) {
-      fs.mkdirSync(imageUploadsDir, { recursive: true });
-    }
     const imageUrls = [];
     for (const file of req.files.images) {
       const filename = Date.now() + "-" + file.originalname;
@@ -28,10 +25,6 @@ export async function saveFiles(req, res, next) {
 
     if (!req.files.manual) {
       return next();
-    }
-
-    if (!fs.existsSync(toolManualsDir)) {
-      fs.mkdirSync(toolManualsDir, { recursive: true });
     }
 
     if (

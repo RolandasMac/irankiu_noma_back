@@ -203,7 +203,7 @@ export async function createTool(req, res) {
 export async function updateTool(req, res) {
   const { id } = req.params;
   const updates = req.body;
-  // console.log("Updates", id);
+  console.log("Updates", req.body);
   updates.rented_until = mergeDateWithCurrentTime(updates.rented_until);
 
   // console.log("🔄 Updating tool:", {

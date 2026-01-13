@@ -92,6 +92,14 @@ export const fullToolSchema = Joi.object({
   images_urls: Joi.array().items(Joi.string()).required(),
   group: Joi.string().required(),
   required_addons: Joi.array().items(Joi.string()),
+  manuals_urls: Joi.array()
+    .items(
+      Joi.object({
+        manualFilename: Joi.string().required(),
+        thumbnailFilename: Joi.string().required(),
+      })
+    )
+    .default([]),
 });
 
 // -----Multer-----
@@ -142,6 +150,10 @@ router.post(
     { name: "manual", maxCount: 1 },
   ]),
   createThumbnailsMiddleware,
+  // (req, res, next) => {
+  //   console.log("Veikia po update thumbnails", req.body, req.files);
+  //   return;
+  // },
   transformBody,
   validateBody(toolSchema),
   saveFiles,
@@ -151,16 +163,26 @@ router.put(
   "/:id",
   checkRole(["admin"]),
   // upload.array("images"),
+  (req, res, next) => {
+    console.log("Veikia", req.body);
+    next();
+  },
   upload.fields([
     { name: "images", maxCount: 10 },
-    { name: "manual", maxCount: 1 },
+    { name: "new_manuals", maxCount: 1 },
   ]),
+  (req, res, next) => {
+    console.log("Veikia po", req.body, req.files);
+    next();
+  },
   //reikia pataisyti!!!!!!!!!!
   updateThumbnailsMiddleware,
-
+  // (req, res, next) => {
+  //   console.log("Veikia po update thumbnails", req.body, req.files);
+  //   return;
+  // },
   transformUpdateBody,
   validateBeforeUpload(basicToolSchema),
-
   // Reikia pataisyti!!!!!!!!!!
   saveUpdatedFiles,
   validateBody(fullToolSchema),
