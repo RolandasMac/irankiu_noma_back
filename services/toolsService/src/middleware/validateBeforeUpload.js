@@ -11,7 +11,7 @@ export function validateBeforeUpload(schema) {
       // console.log("❌ Pre-upload validation failed:", error.details);
       return res.status(400).json({
         success: false,
-        message: "Validacijos klaida",
+        message: "Validacijos klaida Before Upload",
         details: error.details.map((d) => d.message),
       });
     }

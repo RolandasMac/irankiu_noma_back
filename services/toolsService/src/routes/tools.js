@@ -22,6 +22,8 @@ import {
   getGroupById,
   updateGroup,
   deleteGroup,
+  getTokenForManuals,
+  getManuals,
 } from "../controllers/toolsController.js";
 import multer from "multer";
 import path from "path";
@@ -77,6 +79,14 @@ export const basicToolSchema = Joi.object({
   group: Joi.string().required(),
   // required_addons: Joi.array().items(Joi.string()),
   required_addons: Joi.array().items(Joi.string()).optional().allow(null),
+  current_manuals: Joi.array()
+    .items(
+      Joi.object({
+        manualFilename: Joi.string().required(),
+        thumbnailFilename: Joi.string().required(),
+      })
+    )
+    .default([]),
 });
 
 // Pilna schema antrajai validacijai (su failais)
@@ -163,18 +173,18 @@ router.put(
   "/:id",
   checkRole(["admin"]),
   // upload.array("images"),
-  (req, res, next) => {
-    console.log("Veikia", req.body);
-    next();
-  },
+  // (req, res, next) => {
+  //   console.log("Veikia", req.body);
+  //   next();
+  // },
   upload.fields([
     { name: "images", maxCount: 10 },
-    { name: "new_manuals", maxCount: 1 },
+    { name: "new_manuals", maxCount: 10 },
   ]),
-  (req, res, next) => {
-    console.log("Veikia po", req.body, req.files);
-    next();
-  },
+  // (req, res, next) => {
+  //   console.log("Veikia po", req.body, req.files);
+  //   next();
+  // },
   //reikia pataisyti!!!!!!!!!!
   updateThumbnailsMiddleware,
   // (req, res, next) => {
@@ -277,6 +287,18 @@ router.delete("/addon/:id", async (req, res) => {
     res.status(400).json({ error: err.message });
   }
 });
+
+router.get(
+  "/get-manuals-token/:toolId?",
+  // (req, res, next) => {
+  //   res.json({ token: process.env.MANUAL_DOWNLOAD_SECRET });
+  // },
+  getTokenForManuals
+);
+router.get("/get-manuals", getManuals);
+
+// Visada gale, nes nėra prefix. Id jartais priimamas kaip prefix.
 router.get("/:id", checkRole(["admin", "manager"]), getTool);
 router.delete("/:id", checkRole(["admin"]), deleteTool);
+
 export default router;

@@ -54,20 +54,20 @@ export async function transformUpdateBody(req, res, next) {
           : req.body.required_addons
         : [];
 
-    // console.log("🔄 Transformed body:", {
-    //   toolName: req.body.toolName,
-    //   description: req.body.description,
-    //   toolPrice: req.body.toolPrice,
-    //   rentPrice: req.body.rentPrice,
-    //   existingImages: req.body.existingImages?.length,
-    //   deletedImages: req.body.deletedImages?.length,
-    //   required_addons:
-    //     req.body.required_addons !== ""
-    //       ? !Array.isArray(req.body.required_addons)
-    //         ? [req.body.required_addons]
-    //         : req.body.required_addons
-    //       : [],
-    // });
+    if (typeof req.body.current_manuals === "string") {
+      try {
+        const parsed = JSON.parse(req.body.current_manuals);
+        req.body.current_manuals =
+          parsed && Array.isArray(parsed) ? [...parsed] : [parsed];
+      } catch (err) {
+        console.error("Invalid JSON in current_manuals", err);
+        req.body.current_manuals = [];
+      }
+    } else if (!Array.isArray(req.body.current_manuals)) {
+      req.body.current_manuals = [];
+    }
+
+    console.log("🔄 Transformed body:2", req.body.current_manuals);
 
     next();
   } catch (error) {

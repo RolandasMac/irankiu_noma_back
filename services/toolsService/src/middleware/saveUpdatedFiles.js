@@ -9,9 +9,9 @@ export async function saveUpdatedFiles(req, res, next) {
   try {
     console.log("🔄 Starting file processing...");
 
-    if (!fs.existsSync(imageUploadsDir)) {
-      fs.mkdirSync(imageUploadsDir, { recursive: true });
-    }
+    // if (!fs.existsSync(imageUploadsDir)) {
+    //   fs.mkdirSync(imageUploadsDir, { recursive: true });
+    // }
 
     const imageUrls = [];
 
@@ -99,6 +99,7 @@ export async function saveUpdatedFiles(req, res, next) {
 
         manual_url.thumbnailFilename = thumbnailFilename;
         fs.writeFileSync(thumbnailFilepath, thumbnailFile);
+        console.log("✅ Saved new manual:", manual_url);
         req.body.manuals_urls.push(manual_url);
       });
     } else {
@@ -125,7 +126,18 @@ export async function saveUpdatedFiles(req, res, next) {
       console.log(`✅ Deleted ${req.body.deletedManuals.length} manuals`);
     }
     // Išsaugome galutinį manuals
-    if (!req.body.current_manuals) req.body.current_manuals = [];
+    if (!req.body.current_manuals || req.body.current_manuals.length === 0) {
+      console.log(
+        "Išsaugo tuščią req.body.current_manuals",
+        req.body.current_manuals
+      );
+      req.body.current_manuals = [];
+      console.log(
+        "Išsaugo tuščią req.body.current_manuals",
+        req.body.current_manuals
+      );
+    }
+
     req.body.manuals_urls = [
       ...req.body.current_manuals,
       ...req.body.manuals_urls,

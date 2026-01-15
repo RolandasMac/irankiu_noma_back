@@ -3,7 +3,7 @@ import Group from "../models/Groups.js";
 import path from "path";
 import fs from "fs";
 import paths from "../../../../config/paths.js";
-import mongoose from "mongoose";
+import jwt from "jsonwebtoken";
 
 const { imageUploadsDir, templatesDir } = paths;
 export async function listTools(req, res) {
@@ -412,6 +412,60 @@ export async function deleteGroup(req, res) {
     res.json({ success: true, message: "Grupė ištrinta" });
   } catch (err) {
     res.status(500).json({ success: false, message: "Klaida trinant grupę" });
+  }
+}
+
+export async function getTokenForManuals(req, res) {
+  const toolId = req.params.toolId;
+
+  if (!toolId) {
+    return res.status(404).json({ message: "Manual not available" });
+  }
+
+  const token = jwt.sign(
+    {
+      toolId: toolId,
+      type: "manual_download",
+    },
+    process.env.MANUAL_DOWNLOAD_SECRET,
+    { expiresIn: "10d" }
+  );
+
+  res.json({ token });
+}
+
+export async function getManuals(req, res) {
+  try {
+    const payload = jwt.verify(
+      req.query.token,
+      process.env.MANUAL_DOWNLOAD_SECRET
+    );
+
+    if (payload.type !== "manual_download") {
+      return res.status(403).end();
+    }
+    // return res
+    //   .status(200)
+    //   .json({ message: "Download successful", token: req.query.token });
+    console.log("payload.toolId", payload.toolId);
+    const manuals = await Tool.findOne(
+      { _id: payload.toolId },
+      { manuals_urls: 1, _id: 0 }
+    ).lean();
+    if (!manuals)
+      return res
+        .status(404)
+        .json({ success: false, message: "Manual not found" });
+    return res.json({
+      success: true,
+      message: "Tool found successfully",
+      manuals: manuals,
+    });
+
+    // const filePath = path.join(toolManualsDir, manual.manualFilename);
+    // res.download(filePath);
+  } catch (err) {
+    return res.status(403).json({ message: "Token expired or invalid" });
   }
 }
 
