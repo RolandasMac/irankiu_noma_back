@@ -253,6 +253,8 @@ const allowlist = [
   /^\/auth-public\/sendemailcode$/,
   /^\/auth-public\/createuser$/,
   /^\/tools-public\/manuals(\/.*)?$/,
+  /^\/tools-public\/thumbnails(\/.*)?$/,
+  // /^\/tools-public\/manuals(\/.*)?$/,
   /^\/tools-public\/get-manuals-token(\/.*)?$/,
   /^\/tools-public\/get-manuals(\/.*)?$/,
 ];

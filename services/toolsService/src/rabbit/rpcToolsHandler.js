@@ -1,6 +1,7 @@
 import { getChannel } from "./rabbitConnection.js";
 import Tool from "../models/Tool.js";
-import Group from "../models/Groups.js";
+// import Group from "../models/Groups.js";
+import { createToken } from "../utils/createToken.js";
 export async function startToolsRpcListener() {
   const channel = getChannel();
   const queueName = "TOOLS_REQUEST";
@@ -19,6 +20,8 @@ export async function startToolsRpcListener() {
       if (action === "get-tool") {
         // tool = await Tool.findById(toolId).lean();
         tool = await Tool.findById(toolId).populate("group").lean();
+        const token = createToken(toolId);
+        tool.manualsToken = token;
       } else if (action === "update-tool") {
         tool = await Tool.findByIdAndUpdate(toolId, data, { new: true });
       }

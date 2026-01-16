@@ -6,6 +6,7 @@ import paths from "../../../../config/paths.js";
 import jwt from "jsonwebtoken";
 
 const { imageUploadsDir, templatesDir } = paths;
+const tokenSecret = process.env.MANUAL_DOWNLOAD_SECRET;
 export async function listTools(req, res) {
   const page = Math.max(1, Number(req.query.page) || 1);
   const limit = Math.min(100, Number(req.query.limit) || 20);
@@ -427,7 +428,7 @@ export async function getTokenForManuals(req, res) {
       toolId: toolId,
       type: "manual_download",
     },
-    process.env.MANUAL_DOWNLOAD_SECRET,
+    tokenSecret,
     { expiresIn: "10d" }
   );
 
