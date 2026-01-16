@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import paths from "../../../../config/paths.js";
 
-const { imageUploadsDir, thumbnailsDir, toolManualsDir } = paths;
+const { imageUploadsDir, toolManualsDir, thumbnailsDir } = paths;
 
 export async function saveUpdatedFiles(req, res, next) {
   req.body.manuals_urls = [];
@@ -113,7 +113,9 @@ export async function saveUpdatedFiles(req, res, next) {
     }
 
     // Pašalinam Ištrintas manuals ir miniatiūros
+    console.log("🗑️ Deleting1", req.body);
     if (req.body.deletedManuals && req.body.deletedManuals.length > 0) {
+      console.log("🗑️ Deleting2", req.body.deletedManuals.length, "manuals");
       req.body.deletedManuals.forEach((manual) => {
         const manualFilepath = path.join(toolManualsDir, manual.manualFilename);
         fs.unlinkSync(manualFilepath);

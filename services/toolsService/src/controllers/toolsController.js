@@ -4,8 +4,9 @@ import path from "path";
 import fs from "fs";
 import paths from "../../../../config/paths.js";
 import jwt from "jsonwebtoken";
+import { deleteManualsAndThumbnails } from "../utils/deleteFiles.js";
 
-const { imageUploadsDir, templatesDir } = paths;
+const { imageUploadsDir, templatesDir, toolManualsDir, thumbnailsDir } = paths;
 const tokenSecret = process.env.MANUAL_DOWNLOAD_SECRET;
 export async function listTools(req, res) {
   const page = Math.max(1, Number(req.query.page) || 1);
@@ -274,6 +275,13 @@ export async function deleteTool(req, res) {
         }
       }
     }
+    // Pašalinam thumbnails ir manuals
+
+    deleteManualsAndThumbnails(
+      tool.manuals_urls,
+      toolManualsDir,
+      thumbnailsDir
+    );
 
     // 3️⃣ Ištriname įrankį iš DB
     await Tool.findByIdAndDelete(id);

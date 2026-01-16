@@ -87,6 +87,16 @@ export const basicToolSchema = Joi.object({
       })
     )
     .default([]),
+  deletedManuals: Joi.array()
+    .items(
+      Joi.object({
+        manualFilename: Joi.string().required(),
+        thumbnailFilename: Joi.string().required(),
+      })
+    )
+    .optional()
+    .default([])
+    .allow(null),
 });
 
 // Pilna schema antrajai validacijai (su failais)

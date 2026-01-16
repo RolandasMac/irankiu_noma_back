@@ -66,9 +66,20 @@ export async function transformUpdateBody(req, res, next) {
     } else if (!Array.isArray(req.body.current_manuals)) {
       req.body.current_manuals = [];
     }
-
-    console.log("🔄 Transformed body:2", req.body.current_manuals);
-
+    console.log("ccccccccccccccc", req.body.deletedManuals);
+    if (req.body.deletedManuals !== undefined) {
+      try {
+        const parsed = JSON.parse(req.body.deletedManuals);
+        req.body.deletedManuals = Array.isArray(parsed)
+          ? [...parsed]
+          : [parsed];
+      } catch (err) {
+        console.error("Invalid JSON in deletedManuals", err);
+        req.body.deletedManuals = [];
+      }
+    } else {
+      req.body.deletedManuals = [];
+    }
     next();
   } catch (error) {
     // console.error("Transform body error:", error);
