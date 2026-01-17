@@ -54,7 +54,7 @@ function createImageModule() {
     },
 
     getSize() {
-      return [150, 150];
+      return [250, 250];
     },
 
     getProps() {

@@ -4,7 +4,7 @@ import path from "path";
 import fs from "fs";
 import paths from "../../../../config/paths.js";
 import jwt from "jsonwebtoken";
-import { deleteManualsAndThumbnails } from "../utils/deleteFiles.js";
+import { deleteFile } from "../utils/deleteFiles.js";
 
 const { imageUploadsDir, templatesDir, toolManualsDir, thumbnailsDir } = paths;
 const tokenSecret = process.env.MANUAL_DOWNLOAD_SECRET;
@@ -257,31 +257,22 @@ export async function deleteTool(req, res) {
     }
 
     // 2️⃣ Pašaliname susijusius failus, jei jie egzistuoja
-    if (Array.isArray(tool.images_urls)) {
+    if (tool.images_urls && Array.isArray(tool.images_urls)) {
       for (const imgUrl of tool.images_urls) {
-        // Jei saugomas pilnas kelias arba tik failo pavadinimas
-        const filename = path.basename(imgUrl);
-        const filePath = path.join(imageUploadsDir, filename);
-
-        try {
-          if (fs.existsSync(filePath)) {
-            fs.unlinkSync(filePath);
-            console.log(`[DELETE] Ištrintas failas: ${filePath}`);
-          } else {
-            console.warn(`[WARN] Failas nerastas: ${filePath}`);
-          }
-        } catch (err) {
-          console.error(`[ERROR] Klaida trinant failą ${filePath}:`, err);
-        }
+        deleteFile(imageUploadsDir, imgUrl);
       }
+    } else {
+      console.log("There is no imege files to delete");
     }
     // Pašalinam thumbnails ir manuals
-
-    deleteManualsAndThumbnails(
-      tool.manuals_urls,
-      toolManualsDir,
-      thumbnailsDir
-    );
+    if (tool.manuals_urls && Array.isArray(tool.manuals_urls)) {
+      for (const manual of tool.manuals_urls) {
+        deleteFile(toolManualsDir, manual.manualFilename);
+        deleteFile(thumbnailsDir, manual.thumbnailFilename);
+      }
+    } else {
+      console.log("There is no manuals and thumbnails files to delete");
+    }
 
     // 3️⃣ Ištriname įrankį iš DB
     await Tool.findByIdAndDelete(id);

@@ -167,7 +167,7 @@ router.post(
   checkRole(["admin"]),
   upload.fields([
     { name: "images", maxCount: 10 },
-    { name: "manual", maxCount: 1 },
+    { name: "manual", maxCount: 10 },
   ]),
   createThumbnailsMiddleware,
   // (req, res, next) => {

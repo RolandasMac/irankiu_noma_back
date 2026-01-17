@@ -1,24 +1,15 @@
 import fs from "fs";
 import path from "path";
 import paths from "../../../../config/paths.js";
-
+import { deleteFile } from "../utils/deleteFiles.js";
 const { imageUploadsDir, toolManualsDir, thumbnailsDir } = paths;
 
 export async function saveUpdatedFiles(req, res, next) {
   req.body.manuals_urls = [];
   try {
-    console.log("🔄 Starting file processing...");
-
-    // if (!fs.existsSync(imageUploadsDir)) {
-    //   fs.mkdirSync(imageUploadsDir, { recursive: true });
-    // }
-
     const imageUrls = [];
-
     // Įkelti naujus failus
     if (req.files && req.files.length > 0) {
-      console.log(`📁 Processing ${req.files.length} new files`);
-
       for (const file of req.files) {
         const filename = `${Date.now()}_${Math.random()
           .toString(36)
@@ -27,30 +18,22 @@ export async function saveUpdatedFiles(req, res, next) {
 
         fs.writeFileSync(filepath, file.buffer);
         imageUrls.push(filename);
-
-        console.log(`✅ Saved new file: ${filename}`);
       }
     } else {
       console.log("📁 No new files to process");
     }
 
     // Ištrinti pažymėtas nuotraukas
-    if (req.body.deletedImages && req.body.deletedImages.length > 0) {
-      console.log(`🗑️ Deleting ${req.body.deletedImages.length} marked files`);
-
+    if (
+      req.body.deletedImages &&
+      Array.isArray(req.body.deletedImages) &&
+      req.body.deletedImages.length > 0
+    ) {
       for (const imageUrl of req.body.deletedImages) {
-        try {
-          const filepath = path.join(imageUploadsDir, imageUrl);
-          if (fs.existsSync(filepath)) {
-            fs.unlinkSync(filepath);
-            console.log(`✅ Deleted file: ${imageUrl}`);
-          } else {
-            console.log(`⚠️ File not found: ${imageUrl}`);
-          }
-        } catch (err) {
-          console.error(`❌ Error deleting file ${imageUrl}:`, err);
-        }
+        deleteFile(imageUploadsDir, imageUrl);
       }
+    } else {
+      console.log("🗑️ There is no image files to delete");
     }
 
     // Sujungti esamas ir naujas nuotraukas (išfiltruojant pašalintas)
@@ -58,28 +41,14 @@ export async function saveUpdatedFiles(req, res, next) {
     const filteredExisting = existingImages.filter(
       (img) => !req.body.deletedImages?.includes(img)
     );
-
     req.body.images_urls = [...filteredExisting, ...imageUrls];
 
-    console.log("📊 File processing result:", {
-      existing: filteredExisting.length,
-      new: imageUrls.length,
-      total: req.body.images_urls.length,
-    });
-
     // Išsaugome naujas manuals
-
     if (
       req.files.new_manuals &&
       req.files.new_manuals.length > 0 &&
       req.thumbnailsData.length === req.files.new_manuals.length
     ) {
-      console.log(
-        "Čia veikia palyginimas",
-        req.files.new_manuals.length,
-        req.thumbnailsData.length
-      );
-
       req.files.new_manuals.forEach((manual) => {
         // const manualFile = manual;
         const manualFilename = Date.now() + "-" + manual.originalname;
@@ -96,61 +65,42 @@ export async function saveUpdatedFiles(req, res, next) {
         const thumbnailFile = thumbnail.buffer;
         const thumbnailFilename = thumbnail.thumbnailName;
         const thumbnailFilepath = path.join(thumbnailsDir, thumbnailFilename);
-
         manual_url.thumbnailFilename = thumbnailFilename;
         fs.writeFileSync(thumbnailFilepath, thumbnailFile);
-        console.log("✅ Saved new manual:", manual_url);
         req.body.manuals_urls.push(manual_url);
       });
     } else {
-      console.log(
-        "Nėra naujos instrukcijos ar miniatiūros"
-        // req.thumbnailsData.length,
-        // req.files.manual.length,
-        // req.thumbnailsData
-      );
-      // throw new Error("Nepavyko issaugoti manual");
+      console.log("There is nno new manuals to process");
     }
 
     // Pašalinam Ištrintas manuals ir miniatiūros
-    console.log("🗑️ Deleting1", req.body);
-    if (req.body.deletedManuals && req.body.deletedManuals.length > 0) {
-      console.log("🗑️ Deleting2", req.body.deletedManuals.length, "manuals");
-      req.body.deletedManuals.forEach((manual) => {
-        const manualFilepath = path.join(toolManualsDir, manual.manualFilename);
-        fs.unlinkSync(manualFilepath);
-        const thumbnailFilepath = path.join(
-          thumbnailsDir,
-          manual.thumbnailFilename
-        );
-        fs.unlinkSync(thumbnailFilepath);
-      });
-      console.log(`✅ Deleted ${req.body.deletedManuals.length} manuals`);
+    if (
+      req.body.deletedManuals &&
+      Array.isArray(req.body.deletedManuals) &&
+      req.body.deletedManuals.length > 0
+    ) {
+      for (const manual of req.body.deletedManuals) {
+        deleteFile(toolManualsDir, manual.manualFilename);
+        deleteFile(thumbnailsDir, manual.thumbnailFilename);
+      }
+    } else {
+      console.log("🗑️ There is no manuals to delete");
     }
     // Išsaugome galutinį manuals
     if (!req.body.current_manuals || req.body.current_manuals.length === 0) {
-      console.log(
-        "Išsaugo tuščią req.body.current_manuals",
-        req.body.current_manuals
-      );
       req.body.current_manuals = [];
-      console.log(
-        "Išsaugo tuščią req.body.current_manuals",
-        req.body.current_manuals
-      );
     }
 
     req.body.manuals_urls = [
       ...req.body.current_manuals,
       ...req.body.manuals_urls,
     ];
-    console.log("req.body.manuals_urls", req.body.manuals_urls);
     next();
   } catch (err) {
     console.error("❌ File processing error:", err);
     res.status(500).json({
       success: false,
-      message: "Serverio klaida apdorojant failus",
+      message: "Server error while processing files",
     });
   }
 }
