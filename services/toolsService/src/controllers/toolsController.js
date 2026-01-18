@@ -145,7 +145,7 @@ export async function getTool(req, res) {
 }
 
 export async function createTool(req, res) {
-  console.log("createTool");
+  // console.log("createTool");
   let {
     toolName,
     description,
@@ -205,7 +205,7 @@ export async function createTool(req, res) {
 export async function updateTool(req, res) {
   const { id } = req.params;
   const updates = req.body;
-  console.log("Updates", req.body);
+  // console.log("Updates", req.body);
   updates.rented_until = mergeDateWithCurrentTime(updates.rented_until);
 
   // console.log("🔄 Updating tool:", {
@@ -385,7 +385,7 @@ export async function updateGroup(req, res) {
     const updated = await Group.findByIdAndUpdate(
       req.params.id,
       { group, templates },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     );
 
     if (!updated) {
@@ -428,7 +428,7 @@ export async function getTokenForManuals(req, res) {
       type: "manual_download",
     },
     tokenSecret,
-    { expiresIn: "10d" }
+    { expiresIn: "10d" },
   );
 
   res.json({ token });
@@ -438,7 +438,7 @@ export async function getManuals(req, res) {
   try {
     const payload = jwt.verify(
       req.query.token,
-      process.env.MANUAL_DOWNLOAD_SECRET
+      process.env.MANUAL_DOWNLOAD_SECRET,
     );
 
     if (payload.type !== "manual_download") {
@@ -447,14 +447,14 @@ export async function getManuals(req, res) {
     // return res
     //   .status(200)
     //   .json({ message: "Download successful", token: req.query.token });
-    console.log("payload.toolId", payload.toolId);
+    // console.log("payload.toolId", payload.toolId);
     const manuals = await Tool.findOne(
       { _id: payload.toolId },
-      { manuals_urls: 1, _id: 0 }
+      { manuals_urls: 1, _id: 0 },
     ).lean();
     if (!manuals)
       return res
-        .status(404)
+        .status(200)
         .json({ success: false, message: "Manual not found" });
     return res.json({
       success: true,
@@ -484,7 +484,7 @@ function mergeDateWithCurrentTime(dateString) {
     datePart.getDate(),
     now.getHours(),
     now.getMinutes(),
-    now.getSeconds()
+    now.getSeconds(),
   );
 
   return merged;
