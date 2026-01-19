@@ -1,5 +1,5 @@
 export async function transformBody(req, res, next) {
-  console.log("transformBody");
+  // console.log("transformBody");
   req.body.toolName = req.body.toolName || "";
   req.body.signs = req.body.signs || "";
   req.body.description = req.body.description || [];

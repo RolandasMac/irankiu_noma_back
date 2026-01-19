@@ -170,10 +170,6 @@ router.post(
     { name: "manual", maxCount: 10 },
   ]),
   createThumbnailsMiddleware,
-  // (req, res, next) => {
-  //   console.log("Veikia po update thumbnails", req.body, req.files);
-  //   return;
-  // },
   transformBody,
   validateBody(toolSchema),
   saveFiles,
@@ -182,28 +178,13 @@ router.post(
 router.put(
   "/:id",
   checkRole(["admin"]),
-  // upload.array("images"),
-  // (req, res, next) => {
-  //   console.log("Veikia", req.body);
-  //   next();
-  // },
   upload.fields([
     { name: "images", maxCount: 10 },
     { name: "new_manuals", maxCount: 10 },
   ]),
-  // (req, res, next) => {
-  //   console.log("Veikia po", req.body, req.files);
-  //   next();
-  // },
-  //reikia pataisyti!!!!!!!!!!
   updateThumbnailsMiddleware,
-  // (req, res, next) => {
-  //   console.log("Veikia po update thumbnails", req.body, req.files);
-  //   return;
-  // },
   transformUpdateBody,
   validateBeforeUpload(basicToolSchema),
-  // Reikia pataisyti!!!!!!!!!!
   saveUpdatedFiles,
   validateBody(fullToolSchema),
   updateTool
@@ -298,13 +279,7 @@ router.delete("/addon/:id", async (req, res) => {
   }
 });
 
-router.get(
-  "/get-manuals-token/:toolId?",
-  // (req, res, next) => {
-  //   res.json({ token: process.env.MANUAL_DOWNLOAD_SECRET });
-  // },
-  getTokenForManuals
-);
+router.get("/get-manuals-token/:toolId?", getTokenForManuals);
 router.get("/get-manuals", getManuals);
 
 // Visada gale, nes nėra prefix. Id jartais priimamas kaip prefix.

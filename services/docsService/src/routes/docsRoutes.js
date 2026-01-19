@@ -35,13 +35,6 @@ router.get("/download/:filename", (req, res) => {
   if (!fs.existsSync(filePath)) {
     return res.status(404).send("Failas nerastas");
   }
-  // console.log("filename", generatedDir, filename);
-  // return res.status(200).send({
-  //   success: true,
-  //   message: "Failas atsisiuntas sekoje",
-  //   filename,
-  //   generatedDir,
-  // });
 
   // Nustatome antraštes, kad naršyklė atsisiųstų failą
   res.download(filePath, filename, (err) => {

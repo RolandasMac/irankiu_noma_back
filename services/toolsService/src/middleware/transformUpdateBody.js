@@ -66,7 +66,7 @@ export async function transformUpdateBody(req, res, next) {
     } else if (!Array.isArray(req.body.current_manuals)) {
       req.body.current_manuals = [];
     }
-    console.log("ccccccccccccccc", req.body.deletedManuals);
+    // console.log("ccccccccccccccc", req.body.deletedManuals);
     if (req.body.deletedManuals !== undefined) {
       try {
         const parsed = JSON.parse(req.body.deletedManuals);

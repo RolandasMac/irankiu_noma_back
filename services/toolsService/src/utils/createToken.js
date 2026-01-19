@@ -7,7 +7,7 @@ dotenv.config({ path: path.resolve(__dirname, "../../../../.env") });
 const tokenSecret = process.env.MANUAL_DOWNLOAD_SECRET;
 export function createToken(toolId) {
   try {
-    console.log("Veikia", toolId, tokenSecret);
+    // console.log("Veikia", toolId, tokenSecret);
     if (!toolId) {
       console.log("Tool ID is missing");
       throw new Error("Tool ID is required");

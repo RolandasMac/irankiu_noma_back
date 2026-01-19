@@ -165,9 +165,9 @@ const { thumbnailsDir, toolManualsDir } = paths;
 //   });
 // };
 export const createThumbnailsMiddleware = async (req, res, next) => {
-  console.log("Ar yra manual", req.files.manual);
+  // console.log("Ar yra manual", req.files.manual);
   if (!req.files.manual || req.files.manual.length === 0) {
-    console.log("update thiumbnails neveikia!!! Neatsiųstas joks failas");
+    // console.log("update thiumbnails neveikia!!! Neatsiųstas joks failas");
     return next();
   }
   req.thumbnailsData = [];
@@ -179,7 +179,7 @@ export const createThumbnailsMiddleware = async (req, res, next) => {
 
   try {
     for (const file of req.files.manual) {
-      console.log("forEach");
+      // console.log("forEach");
       originalFileName = file.originalname;
       if (file.mimetype === "application/pdf") {
         // Laikinas failo prefiksas
@@ -217,7 +217,7 @@ export const createThumbnailsMiddleware = async (req, res, next) => {
           // .toFile(thumbnailFilePath);
           .toBuffer();
 
-        console.log(`PDF įkeltas: ${finalThumbnailFileName}`);
+        // console.log(`PDF įkeltas: ${finalThumbnailFileName}`);
       } else {
         throw new Error("Netikėtas failo tipas, kurio neapdorojo serveris.");
       }
@@ -226,7 +226,7 @@ export const createThumbnailsMiddleware = async (req, res, next) => {
       if (tempImagePath && fs.existsSync(tempImagePath)) {
         fs.unlinkSync(tempPdfPath);
         fs.unlinkSync(tempImagePath);
-        console.log(`Laikinas failas ištrintas: ${tempImagePath}`);
+        // console.log(`Laikinas failas ištrintas: ${tempImagePath}`);
       }
 
       req.thumbnailsData.push({
@@ -239,7 +239,7 @@ export const createThumbnailsMiddleware = async (req, res, next) => {
         size: thumbnailBuffer.length,
       });
     }
-    console.log("Čia veikia middleware", req.thumbnailsData);
+    // console.log("Čia veikia middleware", req.thumbnailsData);
     return next();
   } catch (error) {
     console.error(
@@ -269,7 +269,7 @@ export const createThumbnailsMiddleware = async (req, res, next) => {
 };
 export const updateThumbnailsMiddleware = async (req, res, next) => {
   if (!req.files.new_manuals || req.files.new_manuals.length === 0) {
-    console.log("update thiumbnails neveikia!!! Neatsiųstas joks failas");
+    // console.log("update thiumbnails neveikia!!! Neatsiųstas joks failas");
     return next();
   }
   req.thumbnailsData = [];
@@ -281,7 +281,7 @@ export const updateThumbnailsMiddleware = async (req, res, next) => {
 
   try {
     for (const file of req.files.new_manuals) {
-      console.log("forEach");
+      // console.log("forEach");
       originalFileName = file.originalname;
       if (file.mimetype === "application/pdf") {
         // Laikinas failo prefiksas
@@ -319,7 +319,7 @@ export const updateThumbnailsMiddleware = async (req, res, next) => {
           // .toFile(thumbnailFilePath);
           .toBuffer();
 
-        console.log(`PDF įkeltas: ${finalThumbnailFileName}`);
+        // console.log(`PDF įkeltas: ${finalThumbnailFileName}`);
       } else {
         throw new Error("Netikėtas failo tipas, kurio neapdorojo serveris.");
       }
@@ -328,7 +328,7 @@ export const updateThumbnailsMiddleware = async (req, res, next) => {
       if (tempImagePath && fs.existsSync(tempImagePath)) {
         fs.unlinkSync(tempPdfPath);
         fs.unlinkSync(tempImagePath);
-        console.log(`Laikinas failas ištrintas: ${tempImagePath}`);
+        // console.log(`Laikinas failas ištrintas: ${tempImagePath}`);
       }
 
       req.thumbnailsData.push({
@@ -341,7 +341,7 @@ export const updateThumbnailsMiddleware = async (req, res, next) => {
         size: thumbnailBuffer.length,
       });
     }
-    console.log("Čia veikia middleware", req.thumbnailsData);
+    // console.log("Čia veikia middleware", req.thumbnailsData);
     return next();
   } catch (error) {
     console.error(

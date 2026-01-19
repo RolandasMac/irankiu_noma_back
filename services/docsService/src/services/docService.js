@@ -90,7 +90,7 @@ export async function generateFromTemplate(order, newTemplates) {
 
   const manualsUrl = `${MANUALS_BASE_URL}${order.tool.manualsToken}`;
   // ⬇️ GENERUOJAM QR
-  console.log("manualsUrl", manualsUrl);
+  // console.log("manualsUrl", manualsUrl);
   const qrBase64 = await generateQrBase64(
     // `${MANUALS_BASE_URL}/${order.tool.manual_url}`
     manualsUrl

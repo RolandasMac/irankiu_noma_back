@@ -4,12 +4,12 @@ import paths from "../../../../config/paths.js";
 
 const { imageUploadsDir, toolManualsDir, thumbnailsDir } = paths;
 export async function saveFiles(req, res, next) {
-  console.log(
-    "saveFiles",
-    req.files.images,
-    req.files.manual,
-    req.thumbnailsData
-  );
+  // console.log(
+  //   "saveFiles",
+  //   req.files.images,
+  //   req.files.manual,
+  //   req.thumbnailsData
+  // );
   try {
     const imageUrls = [];
     for (const file of req.files.images) {
@@ -18,7 +18,7 @@ export async function saveFiles(req, res, next) {
       fs.writeFileSync(filepath, file.buffer);
       imageUrls.push(`${filename}`);
     }
-    console.log("imageUrls", imageUrls);
+    // console.log("imageUrls", imageUrls);
     req.body.images_urls = [...imageUrls];
 
     // save manuals
@@ -55,12 +55,12 @@ export async function saveFiles(req, res, next) {
         req.body.manuals_urls.push(manual_url);
       });
     } else {
-      console.log(
-        "Nepavyko issaugoti manual",
-        req.thumbnailsData.length,
-        req.files.manual.length,
-        req.thumbnailsData
-      );
+      // console.log(
+      //   "Nepavyko issaugoti manual",
+      //   req.thumbnailsData.length,
+      //   req.files.manual.length,
+      //   req.thumbnailsData
+      // );
       throw new Error("Nepavyko issaugoti manual");
     }
 
