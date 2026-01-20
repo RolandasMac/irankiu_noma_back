@@ -385,7 +385,7 @@ export async function updateGroup(req, res) {
     const updated = await Group.findByIdAndUpdate(
       req.params.id,
       { group, templates },
-      { new: true, runValidators: true },
+      { new: true, runValidators: true }
     );
 
     if (!updated) {
@@ -428,7 +428,7 @@ export async function getTokenForManuals(req, res) {
       type: "manual_download",
     },
     tokenSecret,
-    { expiresIn: "10d" },
+    { expiresIn: "10d" }
   );
 
   res.json({ token });
@@ -438,7 +438,7 @@ export async function getManuals(req, res) {
   try {
     const payload = jwt.verify(
       req.query.token,
-      process.env.MANUAL_DOWNLOAD_SECRET,
+      process.env.MANUAL_DOWNLOAD_SECRET
     );
 
     if (payload.type !== "manual_download") {
@@ -450,7 +450,7 @@ export async function getManuals(req, res) {
     // console.log("payload.toolId", payload.toolId);
     const manuals = await Tool.findOne(
       { _id: payload.toolId },
-      { manuals_urls: 1, _id: 0 },
+      { manuals_urls: 1, _id: 0 }
     ).lean();
     if (!manuals)
       return res
@@ -464,6 +464,41 @@ export async function getManuals(req, res) {
 
     // const filePath = path.join(toolManualsDir, manual.manualFilename);
     // res.download(filePath);
+  } catch (err) {
+    return res.status(403).json({ message: "Token expired or invalid" });
+  }
+}
+// Download one manual
+export async function downloadManual(req, res) {
+  try {
+    const { token } = req.query;
+    const { filename } = req.params;
+
+    console.log("Veikia", token, filename);
+    if (!token || !filename) {
+      return res.status(400).json({ message: "Missing token or filename" });
+    }
+
+    // 🔐 Tikrinam tokeną
+    const payload = jwt.verify(token, process.env.MANUAL_DOWNLOAD_SECRET);
+
+    if (payload.type !== "manual_download") {
+      return res.status(403).json({ message: "Invalid token type" });
+    }
+
+    // 📄 Failo kelias
+    const filePath = path.join(toolManualsDir, filename);
+
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({ message: "Manual not found" });
+    }
+
+    // 🔥 SVARBIAUSIA DALIS (čia mano siūlymas)
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+
+    // 📤 Siunčiam failą
+    return res.sendFile(filePath);
   } catch (err) {
     return res.status(403).json({ message: "Token expired or invalid" });
   }
@@ -484,7 +519,7 @@ function mergeDateWithCurrentTime(dateString) {
     datePart.getDate(),
     now.getHours(),
     now.getMinutes(),
-    now.getSeconds(),
+    now.getSeconds()
   );
 
   return merged;

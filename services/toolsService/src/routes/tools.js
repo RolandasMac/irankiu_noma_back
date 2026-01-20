@@ -24,6 +24,7 @@ import {
   deleteGroup,
   getTokenForManuals,
   getManuals,
+  downloadManual,
 } from "../controllers/toolsController.js";
 import multer from "multer";
 import path from "path";
@@ -281,6 +282,8 @@ router.delete("/addon/:id", async (req, res) => {
 
 router.get("/get-manuals-token/:toolId?", getTokenForManuals);
 router.get("/get-manuals", getManuals);
+// Download one manual
+router.get("/manual-download/:filename", downloadManual);
 
 // Visada gale, nes nėra prefix. Id jartais priimamas kaip prefix.
 router.get("/:id", checkRole(["admin", "manager"]), getTool);
