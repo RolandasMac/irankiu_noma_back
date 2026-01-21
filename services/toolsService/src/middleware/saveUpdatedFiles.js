@@ -9,8 +9,8 @@ export async function saveUpdatedFiles(req, res, next) {
   try {
     const imageUrls = [];
     // Įkelti naujus failus
-    if (req.files && req.files.length > 0) {
-      for (const file of req.files) {
+    if (req.files.images && req.files.images.length > 0) {
+      for (const file of req.files.images) {
         const filename = `${Date.now()}_${Math.random()
           .toString(36)
           .substr(2, 9)}_${file.originalname}`;
