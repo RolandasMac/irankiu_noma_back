@@ -160,7 +160,6 @@ export async function createTool(req, res) {
     manuals_urls,
     // manualThumbnail_url,
   } = req.body;
-  console.log("createTool", rented_until);
 
   if (
     !toolName ||
