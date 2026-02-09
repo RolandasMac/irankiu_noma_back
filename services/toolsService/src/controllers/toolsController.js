@@ -145,7 +145,6 @@ export async function getTool(req, res) {
 }
 
 export async function createTool(req, res) {
-  // console.log("createTool");
   let {
     toolName,
     description,
@@ -161,6 +160,8 @@ export async function createTool(req, res) {
     manuals_urls,
     // manualThumbnail_url,
   } = req.body;
+  console.log("createTool", rented_until);
+
   if (
     !toolName ||
     !description ||

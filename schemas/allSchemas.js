@@ -18,7 +18,12 @@ export const tools = {
   toolPrice: { type: Number, required: true },
   depozit: { type: Number, required: true },
   rented: { type: Boolean, required: true, default: false },
-  rented_until: { type: Date, required: false },
+  rented_until: {
+    type: Date,
+    required: true,
+    default: Date.now,
+    set: (v) => v ?? Date.now(),
+  },
   signs: { type: [String], required: false, default: "" },
   rentPrice: { type: Number, required: true },
   group: { type: String, required: true },
