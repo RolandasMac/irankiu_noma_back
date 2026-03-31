@@ -25,18 +25,20 @@ export async function startDiscountRpcListener() {
         max_days: { $gte: days },
       });
 
-      // console.log("discount", discount[0].discount);
+      // console.log("discount", discount);
       channel.sendToQueue(
         msg.properties.replyTo,
-        Buffer.from(JSON.stringify(discount[0].discount || null)),
-        { correlationId: msg.properties.correlationId }
+        Buffer.from(
+          JSON.stringify(discount.length > 0 ? discount[0].discount : null),
+        ),
+        { correlationId: msg.properties.correlationId },
       );
     } catch (err) {
       console.error("❌ Error fetching client:", err);
       channel.sendToQueue(
         msg.properties.replyTo,
-        Buffer.from(JSON.stringify({ error: err.message })),
-        { correlationId: msg.properties.correlationId }
+        Buffer.from(JSON.stringify({ error: err })),
+        { correlationId: msg.properties.correlationId },
       );
     } finally {
       channel.ack(msg);
