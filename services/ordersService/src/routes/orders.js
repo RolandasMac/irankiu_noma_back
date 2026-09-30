@@ -46,8 +46,8 @@ const orderSchema = Joi.object({
         name: Joi.string().trim().max(100).required(),
         price: Joi.number().precision(2).min(0).max(1000).required(),
         id: Joi.string().hex().length(24).required(),
-        quantity: Joi.number().integer().min(1).max(99).required(),
-      })
+        quantity: Joi.number().integer().min(0).max(99).required(),
+      }),
     )
     .max(20)
     .optional(),
@@ -59,21 +59,21 @@ router.post(
   "/",
   checkRole(["admin", "manager"]),
   validateBody(orderSchema),
-  createOrder
+  createOrder,
 );
 router.put(
   "/:id",
   checkRole(["admin", "manager"]),
   validateBody(orderSchema),
   deleteOldDocs,
-  updateOrder
+  updateOrder,
 );
 router.put(
   "/cancel-order/:id",
   checkRole(["admin", "manager"]),
   // validateBody(orderSchema),
   // testMiddleware,
-  cancelOrder
+  cancelOrder,
 );
 router.delete("/:id", checkRole(["admin"]), deleteOldDocs, deleteOrder);
 router.post("/test", checkRole(["admin", "manager"]), test);

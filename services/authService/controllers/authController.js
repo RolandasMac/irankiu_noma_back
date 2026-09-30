@@ -27,7 +27,7 @@ function generateAccessToken(user) {
     { id: user.id, email: user.email, roles: user.roles, name: user.name },
     JWT_SECRET,
     // { expiresIn: "1h" }
-    { expiresIn: "30s" }
+    { expiresIn: "30s" },
   );
 }
 
@@ -89,7 +89,7 @@ export const createUser = async (req, res) => {
     const { code, name, password1, email1 } = req.body;
     if (!code || !name || !password1) {
       throw new Error(
-        "Neperduoti reikiami duomenys:kodas,vardas ar slaptažodis"
+        "Neperduoti reikiami duomenys:kodas,vardas ar slaptažodis",
       );
     }
     const email = authPlugin.getEmailByCode(code);
@@ -374,7 +374,7 @@ export const updateuser = async (req, res) => {
     const updateduser = await User.findOneAndUpdate(
       { _id: id },
       { name, email, roles, phoneNr },
-      { new: true }
+      { new: true },
     ).select("-password");
     if (!updateduser) {
       throw new Error("Vartotojo duomenų atnaujinti nepavyko");
